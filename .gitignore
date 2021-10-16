@@ -1,0 +1,4 @@
+.env
+/data
+*.lcov
+/cov_profile
