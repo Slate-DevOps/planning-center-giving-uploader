@@ -19,3 +19,14 @@ Deno.test("Load sources test", async () => {
 
     assertEquals(await source.sources, [{id: "test id", name: "source name"}]);
 })
+
+Deno.test("Handle source test", async () => {
+    const source = new Sources([], "test string");
+
+    const getAll: Stub<Sources> = stub(source, "getAll");
+    getAll.returns = [[{id: "22", attributes: { name: "source name"}}]] 
+    await source.loadsources();
+
+    assertEquals(source.handleSource("source name"), 22);
+    assertEquals(source.handleSource("not ource name"), 2401);
+})
