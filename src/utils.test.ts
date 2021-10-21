@@ -2,16 +2,16 @@ import { assertEquals, assertThrows } from "https://deno.land/std@0.111.0/testin
 import { formatDate, hasOwnProperty, hasOwnPropertyInArray, validateObject, validateProperty } from "../src/utils.ts";
 
 Deno.test("Format date test", () => {
-    assertEquals(formatDate('1-1-2010'), "2010-01-01T04:00:00.000Z");
+    assertEquals(formatDate('1-1-2010'), "2010-01-01T05:00:00.000Z");
 })
 
-Deno.test("Has own property", () => {
+Deno.test("Has own property test", () => {
     const obj = {prop: "test property"}
     assertEquals(hasOwnProperty(obj, "prop"), true)
     assertEquals(hasOwnProperty(obj, "notProp"), false)
 })
 
-Deno.test("Has own property in array", () => {
+Deno.test("Has own property in array test", () => {
     const obj = {prop: "test prop"}
     assertEquals(hasOwnPropertyInArray(obj, ["not prop","pRoP"]), "prop")
     assertEquals(hasOwnPropertyInArray(obj, ["not prop"]), undefined)

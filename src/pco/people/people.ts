@@ -1,5 +1,5 @@
 import { Observer, StatusCode } from "../../importerWatcher.ts";
-import { Pco } from "../index.ts";
+import { Pco } from "../pco.ts";
 import { formatDate, validateObject } from "../../utils.ts";
 
 interface Person {

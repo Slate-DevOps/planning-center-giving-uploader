@@ -3,7 +3,7 @@ import { Funds } from "../funds.ts";
 import { Sources } from "../sources.ts";
 import { Donation } from "./donation.ts";
 
-import { Pco } from "../../index.ts";
+import { Pco } from "../../pco.ts";
 import { Observer } from "../../../importerWatcher.ts";
 import { validateObject } from "../../../utils.ts";
 

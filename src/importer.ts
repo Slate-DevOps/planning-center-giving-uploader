@@ -1,8 +1,8 @@
-import { getTransactions } from "./paypal/index.ts";
+import { getTransactions } from "./paypal/paypal.ts";
 import { People } from "./pco/people/people.ts";
 import { Donations } from "./pco/giving/donations/donations.ts";
 import { Observer, StatusCode } from "./importerWatcher.ts";
-import { Pco } from "./pco/index.ts";
+import { Pco } from "./pco/pco.ts";
 import * as ssf from "https://cdn.skypack.dev/ssf?dts";
 import { xlsx } from "../denoReplacements/xlsx.ts";
 const { read, utils } = xlsx;

@@ -1,4 +1,4 @@
-import { Pco } from "../index.ts";
+import { Pco } from "../pco.ts";
 import { Observer } from "../../importerWatcher.ts";
 import { validateObject } from "../../utils.ts";
 
