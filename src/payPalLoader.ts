@@ -4,16 +4,11 @@ import {cron} from 'https://deno.land/x/deno_cron/cron.ts';
 
 class obsNothing implements Observer {
   update(
-    _from: Subject,
+    from: Subject,
     message: string,
     code: StatusCode,
     object?: unknown,
-  ): void {
-    console.log(`Message: ${message}\nCode: ${code}\n`);
-    if (object) {
-      console.log(object);
-    }
-  }
+  ): void {}
 }
 
 const main = async () => {
