@@ -1,16 +1,16 @@
-import { Pco } from "../pco.ts";
+import { PCO } from "../pco.ts";
 import { Observer } from "../../importerWatcher.ts";
-import { validateObject } from "../../utils.ts";
+import { PcoObject } from "../pcoObject.ts"
 
 /**
  * Class Sources holds tuples of ids and names of sources that have been stored in planning center
  * It can be used verify that a source exists
  */
-export class Sources extends Pco {
+export class Sources extends PcoObject {
   sources: { id: string; name: string }[];
 
-  constructor(observers: Observer[], token?: string) {
-    super(observers, "giving/v2/payment_sources", token);
+  constructor(PCO: PCO, observers: Observer[], token?: string) {
+    super(PCO, observers, "giving/v2/payment_sources", token);
     this.sources = [];
   }
 
@@ -41,25 +41,7 @@ export class Sources extends Pco {
     if (sourceId) {
       return parseInt(sourceId.id);
     } else {
-      return 2401;
+      throw new Error(`Source with name ${source} does not exist`);
     }
-  }
-
-  async idLookup(sourceId: string): Promise<string | undefined> {
-    const source = this.sources.find((elem) => {
-      return elem.id === sourceId;
-    });
-    let sourceName;
-
-    if (source !== undefined) {
-      sourceName = source.name;
-    } else {
-      const res = await this.getExact(`/${sourceId}`);
-      sourceName = res
-        ? validateObject<string>(res, ["data", "attributes", "name"])
-        : undefined;
-    }
-
-    return sourceName;
   }
 }

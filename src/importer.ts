@@ -1,21 +1,19 @@
 import { getTransactions } from "./paypal/paypal.ts";
-import { People } from "./pco/people/people.ts";
-import { Donations } from "./pco/giving/donations/donations.ts";
-import { Observer, StatusCode } from "./importerWatcher.ts";
-import { Pco } from "./pco/pco.ts";
+import { Observer, StatusCode, Subject } from "./importerWatcher.ts";
+import { PCO } from "./pco/pco.ts";
 import * as ssf from "https://cdn.skypack.dev/ssf?dts";
 import { xlsx } from "../denoReplacements/xlsx.ts";
 const { read, utils } = xlsx;
 import { Donation } from "./pco/giving/donations/donation.ts";
-import { validateObject, validateProperty } from "./utils.ts";
+import { validateObject, validateProperty } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 /**
  * Importer class provides a way to import some csv files containing donation info into PCO or pull new donations from PayPal.
  */
-export class Importer extends Pco {
+export class Importer extends Subject{
   IsSetup: boolean;
-  Donate: Donations;
-  people: People;
+  token: string;
+  PCO: PCO;
 
   /**
    * Creates an Importer object with the given list of Observers and token if present
@@ -23,10 +21,10 @@ export class Importer extends Pco {
    * @param token Optional token to be used to import from PCO
    */
   constructor(observers: Observer[], token?: string) {
-    super(observers, "", token);
+    super(observers);
     this.IsSetup = false;
-    this.Donate = new Donations(observers, token);
-    this.people = new People(observers, token);
+    this.token = token? token : '';
+    this.PCO = new PCO(observers, token);
   }
 
   /**
@@ -35,7 +33,7 @@ export class Importer extends Pco {
    */
   private setup(): Promise<unknown> {
     this.IsSetup = true;
-    return this.Donate.setup();
+    return this.PCO.Giving.donations.setup();
   }
 
   private async parseAndPost(args: {
@@ -86,7 +84,7 @@ export class Importer extends Pco {
       }
 
       try {
-        await this.Donate.postDonation(donation);
+        await this.PCO.Giving.donations.postDonation(donation);
         this.notify("successfully imported donation", StatusCode.success);
       } catch (err) {
         this.notify(
@@ -109,7 +107,11 @@ export class Importer extends Pco {
   ): Promise<Donation> {
     let fullName, uuid, date;
     try {
-      fullName = validateProperty<string>(row, ["Name", "Full Name", "Full_Name"]);
+      fullName = validateProperty<string>(row, [
+        "Name",
+        "Full Name",
+        "Full_Name",
+      ]);
     } catch (_err) {
       fullName = validateProperty<string>(row, ["First Name"]) +
         " " +
@@ -123,7 +125,7 @@ export class Importer extends Pco {
 
     if (fullName) {
       try {
-        uuid = await this.people.getUUID(fullName, email);
+        uuid = await this.PCO.People.person.getUUID(fullName, email);
         this.notify("uuid found", StatusCode.success);
       } catch (err) {
         this.notify(
@@ -138,7 +140,7 @@ export class Importer extends Pco {
       throw Error("Row missing full name");
     }
 
-    const amount = validateProperty<number>(row, ["Amount", "Total Paid"]);
+    const amount = validateProperty<number>(row, ["Amount", "Total Paid", " Amount "]);
     args.batch = args.batch
       ? args.batch
       : validateProperty<string>(row, ["Batch"]);
@@ -208,8 +210,8 @@ export class Importer extends Pco {
       "Getting Most recent PayPal Donation from PCO",
       StatusCode.inprogress,
     );
-    const mostRecent = await this.Donate.getMostRecent("3022");
-    const res = await this.Donate.getExact(`donations/${mostRecent}`);
+    const mostRecent = await this.PCO.Giving.donations.getMostRecent("3022");
+    const res = await this.PCO.Giving.donations.getExact(`donations/${mostRecent}`);
 
     if (!res) {
       throw Error("Error fetching donation");

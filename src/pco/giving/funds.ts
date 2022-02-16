@@ -1,16 +1,16 @@
-import { Pco } from "../pco.ts";
+import { PCO } from "../pco.ts";
 import { Observer } from "../../importerWatcher.ts";
-import { validateObject } from "../../utils.ts";
-
+import { PcoObject } from "../pcoObject.ts"
 /**
  * Class Funds holds tuples of ids and names of funds that have been stored in planning center
  * It can be used verify that a fund exists
  */
-export class Funds extends Pco {
+export class Funds extends PcoObject {
   funds: { id: string; name: string }[];
 
-  constructor(observers: Observer[], token?: string) {
-    super(observers, "giving/v2/funds", token);
+  constructor(PCO: PCO, observers: Observer[], token?: string) {
+    console.log("We're Here!")
+    super(PCO, observers, "giving/v2/funds", token);
     this.funds = [];
   }
 
@@ -42,25 +42,7 @@ export class Funds extends Pco {
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      return 59012;
+      throw new Error(`Fund with name ${fund} does not exist`);
     }
-  }
-
-  async idLookup(fundId: string): Promise<string | undefined> {
-    const fund = this.funds.find((elem) => {
-      return elem.id === fundId;
-    });
-    let fundName;
-
-    if (fund !== undefined) {
-      fundName = fund.name;
-    } else {
-      const res = await this.getExact(`/${fundId}`);
-      fundName = res
-        ? validateObject<string>(res, ["data", "attributes", "name"])
-        : undefined;
-    }
-
-    return fundName;
   }
 }

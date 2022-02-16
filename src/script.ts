@@ -1,4 +1,4 @@
-import "https://deno.land/x/dotenv@v3.0.0/load.ts"
+import "https://deno.land/x/dotenv@v3.0.0/load.ts";
 import { Importer } from "./importer.ts";
 import { Observer, StatusCode, Subject } from "./importerWatcher.ts";
 
@@ -14,9 +14,9 @@ const mailtext = {
 
 const ppCsvPath = `file://${__dirname}../data/${Deno.env.get("PAYDATA")}`;
 // const t2tCsvPath = `file://${__dirname}../data/${Deno.env.get("T2TDATA")}`;
-const uniCsvPath = `file://${__dirname}../data/${Deno.env.get("UNIDATA")}`;
+const uniCsvPath = `C:/Users/ljjb9/Documents/Slate Church/terence/DenoTerence/data/${Deno.env.get("UNIDATA")}`;
 const t2tCsvPath =
-  "C:/Users/ljjb9/Documents/Slate Church/terence/DenoTerence/data/testT2Tbook.csv";
+  `C:/Users/ljjb9/Documents/Slate Church/terence/DenoTerence/data/${Deno.env.get("T2TDATA")}`;
 
 class obsNothing implements Observer {
   update(
@@ -25,9 +25,11 @@ class obsNothing implements Observer {
     code: StatusCode,
     object?: unknown,
   ): void {
-    console.log(`Message: ${message}\nCode: ${code}\n`);
-    if (object) {
-      console.log(object);
+    if(code === StatusCode.error){
+      console.log(`Message: ${message}\nCode: ${code}\n`);
+      if (object) {
+        console.log(object);
+      }
     }
   }
 }
@@ -70,26 +72,6 @@ const main = async () => {
     }
   }
   console.info("done");
-
-  // const transporter = nodemailer.createTransport({
-  //   service: 'gmail',
-  //   auth: {
-  //     user: `${process.env.EML}`,
-  //     pass: `${process.env.EMLPS}`
-  //   }
-  // });
-
-  // const emailInfo = mail.mailOptions(mailtext);
-
-  /*
-  transporter.sendMail(emailInfo, function (err: Error | null) {
-    if (err) {
-      logger.error(err);
-    } else {
-      logger.info('Email sent: ');
-    }
-  });
-  */
 };
 
 main();
