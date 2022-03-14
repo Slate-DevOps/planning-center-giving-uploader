@@ -58,6 +58,31 @@ export class Importer extends Subject{
     this.notify("file loaded", StatusCode.success);
   }
 
+  private async parseDataAndPost(args: {
+    data: string;
+    batch?: string;
+    source?: string;
+    method?: string;
+    fund?: string;
+  }): Promise<void> {
+    if (!this.IsSetup) {
+      await this.setup();
+    }
+    this.notify("loading file", StatusCode.inprogress);
+    const enc = new TextEncoder();
+    const workBook = read(enc.encode(args.data), { type: "buffer" });
+    for (const sheet in workBook.Sheets) {
+      await this.postData({
+        jsonData: utils.sheet_to_json(workBook.Sheets[sheet]),
+        batch: args.batch,
+        source: args.source,
+        method: args.method,
+        fund: args.fund,
+      });
+    }
+    this.notify("file loaded", StatusCode.success);
+  }
+
   private async postData(args: {
     jsonData: unknown[];
     batch?: string;

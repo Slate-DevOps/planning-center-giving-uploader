@@ -195,8 +195,8 @@ export class Person extends PcoObject {
         );
         const filteredPersons = persons.filter(
           (person) =>
-            person[1].first.toLowerCase() === first.toLowerCase() &&
-            person[1].last.toLowerCase() === last.toLowerCase(),
+            (person[1].first.toLowerCase() === first.toLowerCase() || person[1].first.toLowerCase() === `${first.toLowerCase()} ${middle.toLowerCase()}`) &&
+            person[1].last.toLowerCase() === last.toLowerCase() || `${person[1].first.toLowerCase()} ${person[1].last.toLowerCase()}` === `${first.toLowerCase()} ${middle.toLowerCase()}`,
         );
 
         if (filteredPersons.length !== 1) {
