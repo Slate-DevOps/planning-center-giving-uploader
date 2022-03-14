@@ -26,7 +26,7 @@ const options = {
   scopes: 'people+giving', // Scopes limit access for OAuth tokens.
 };
 
-const url = 'https://pco-giving-loader.deno.dev/';
+const url = 'https://pco-giving-loader.deno.dev';
 const port = 4444;
 const api_url = 'https://api.planningcenteronline.com/oauth/authorize'
 
