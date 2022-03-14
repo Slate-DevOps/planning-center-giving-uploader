@@ -2,7 +2,7 @@ import { getTransactions } from "./paypal/paypal.ts";
 import { Observer, StatusCode, Subject } from "./importerWatcher.ts";
 import { PCO } from "./pco/pco.ts";
 import * as ssf from "https://cdn.skypack.dev/ssf?dts";
-import { xlsx } from "../denoReplacements/xlsx.ts";
+import xlsx from "../denoReplacements/xlsx.ts";
 const { read, utils } = xlsx;
 import { Donation } from "./pco/giving/donations/donation.ts";
 import { validateObject, validateProperty } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
