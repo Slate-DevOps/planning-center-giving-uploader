@@ -21,8 +21,8 @@ class obsNothing implements Observer {
 }
 
 const options = {
-  client_id:'ce8113a7129298f8397d5aaa24317ff75a949a8b87691d6c63500f7143c57b43',
-  client_secret: '6a61d8a8927c12e1d838fdee49652a78ae9cb3de7c45b0cd0bc6fe0e4d2dbdf5',
+  client_id: Deno.env.get('PCOID'),
+  client_secret: Deno.env.get('PCOS'),
   scopes: 'people+giving', // Scopes limit access for OAuth tokens.
 };
 
@@ -55,6 +55,33 @@ router.get("/load", async (ctx) => {
   ctx.response.body = 
   `<html>
     <head>
+      <style>
+        .button {
+            background: None; 
+            border-radius: 5px; 
+            border: 2px solid rgb(59, 130, 246); 
+            margin: 1em 1em 1em 0; 
+            padding: 0.25em; 
+            transition: background-color .25s;
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.452);
+        }
+        .button:hover {
+            background: rgb(59, 130, 246);
+            color: white;
+        }
+        .body {
+            font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";  
+            background: linear-gradient(70deg, rgb(181, 204, 255), rgb(255, 233, 237));
+        }
+        .box {
+            background:rgb(255, 255, 255); 
+            border-radius: 10px; 
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.452); 
+            width: fit-content; 
+            padding: 20px; 
+            margin: auto;
+        }
+      </style>
       <script>
         console.log("test")
         //This script can be moved into a seperate file later (github)
@@ -130,28 +157,38 @@ router.get('/ws', async ctx => {
 
 function App() {
   return (
+    <div class="body">
+    <div class="box">
+    <h1>PCO Giving Importer</h1>
     <form id="form" name="form" onsubmit="(e) => {e.preventDefault()}" enctype="multipart/form-data">
-      <div>
-        <p>
-          Data type:
-        </p>
-        <input type="radio" id="PP" name="DATA" value="PP" />
-        <label for="PP">PayPal</label><br />
-        <input type="radio" id="T2T" name="DATA" value="T2T" />
-        <label for="T2T">Text 2 tithe</label><br />
-        <input type="radio" id="UNI" name="DATA" value="UNI" />
-        <label for="UNI">Universal</label><br />
-      </div>
-      <div>
-        <p>
-          File:
-        </p>
-        <input type="file" id="file" name="file" accept=".csv, .xlsx" required />
-      </div>
-      <div>
-        <input type="submit" id="submit" />
-      </div>
+        <div>
+            <h2>
+                Template Type:
+            </h2>
+            <div style="justify-content:left;">
+                <input type="radio" id="PP" name="DATA" value="PP" />
+                <label for="PP">PayPal</label><br />
+                <input type="radio" id="T2T" name="DATA" value="T2T" />
+                <label for="T2T">Text 2 tithe</label><br />
+                <input type="radio" id="UNI" name="DATA" value="UNI" />
+                <label for="UNI">Universal</label><br />
+            </div>
+        </div>
+        <div>
+            <h2>
+                File:
+            </h2>
+            <label for="file" class="button">
+                Select File
+            </label>
+            <input type="file" id="file" name="file" accept=".csv, .xlsx" required style="display:none;"/>
+        </div>
+        <div>
+            <button type="submit" id="submit" class="button">Submit</button>
+        </div>
     </form>
+    </div>
+    </div>
   );
 }
 
