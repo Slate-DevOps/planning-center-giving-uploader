@@ -69,7 +69,7 @@ router.get("/load", async (ctx) => {
             background: rgb(59, 130, 246);
             color: white;
         }
-        .body {
+        body {
             font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";  
             background: linear-gradient(70deg, rgb(181, 204, 255), rgb(255, 233, 237));
         }
