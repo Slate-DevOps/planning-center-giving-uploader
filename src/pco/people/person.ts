@@ -1,8 +1,9 @@
 import { Observer, StatusCode } from "../../importerWatcher.ts";
-import { Pco } from "../index.ts";
-import { formatDate, validateObject } from "../../utils.ts";
+import { PCO } from "../pco.ts";
+import { formatDate, validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
+import { PcoObject } from "../pcoObject.ts"
 
-interface Person {
+interface person {
   first: string;
   given: string;
   last: string;
@@ -10,34 +11,13 @@ interface Person {
   child: boolean;
 }
 
-export class People extends Pco {
+export class Person extends PcoObject {
   /**
    * @param observers
    * @param token
    */
-  constructor(observers: Observer[], token?: string) {
-    super(observers, "people/v2/", token);
-  }
-
-  /**
-   * Adds the email to a specific uuid
-   * @param userId uuid to attach email to
-   * @param email email to be attached to uuid
-   * @returns void promise when complete
-   */
-  async addEmail(userId: string, email: string): Promise<void> {
-    const payload = {
-      data: {
-        type: "Email",
-        attributes: {
-          address: email,
-          location: "primary", // TODO: should we make this configurable?
-          primary: false,
-        },
-      },
-    };
-
-    await this.postNew(payload, "email", `people/${userId}/emails`);
+  constructor(PCO: PCO, observers: Observer[], token?: string) {
+    super(PCO, observers, "people/v2/", token);
   }
 
   /**
@@ -103,94 +83,9 @@ export class People extends Pco {
     const res = await this.postNew(payload, "person", "people");
     const uuid = res ? validateObject<string>(res, ["data", "id"]) : "";
 
-    if (person.email !== "") this.addEmail(uuid, person.email);
+    if (person.email !== "") this.PCO.People.email.postEmail(uuid, person.email);
 
     return uuid;
-  }
-
-  /**
-   * Searches for a person in PCO.
-   * @param {object} params - Contains information about the person
-   * @param {string=} params.anniversary - query on a specific anniversary
-   * @param {string=} params.birthdate - query on a specific birthdate
-   * @param {boolean=} params.child - query on a specific child
-   * @param {string=} params.created_at - query on a specific created_at // TODO: not implemented
-   * @param {string=} params.first_name - query on a specific first_name
-   * @param {string=} params.gender - query on a specific gender
-   * @param {string=} params.given_name - query on a specific given_name
-   * @param {number=} params.grade - query on a specific grade
-   * @param {number=} params.graduation_year - query on a specific graduation_year
-   * @param {string=} params.id - query on a specific id // TODO: not implemented
-   * @param {string=} params.inactivated_at - query on a specific inactivated_at // TODO: not implemented
-   * @param {string=} params.last_name - query on a specific last_name
-   * @param {string=} params.medical_notes - query on a specific medical_notes
-   * @param {string=} params.membership - query on a specific membership
-   * @param {string=} params.middle_name - query on a specific middle_name
-   * @param {string=} params.nickname - query on a specific nickname
-   * @param {string=} params.people_permissions - query on a specific people_permissions
-   * @param {number=} params.remote_id - query on a specific remote_id
-   * @param {string=} params.school_type - query on a specific school_type
-   * @param {boolean=} params.site_administrator - query on a specific site_administrator
-   * @param {string=} params.status - query on a specific status
-   * @param {string=} params.updated_at - query on a specific updated_at // TODO: not implemented
-   *
-   * @returns {object|false} - uuids for found persons or false if not found
-   */
-  async search(params: { [x: string]: string }): Promise<string[]> {
-    // doing this cause they aren't using querystring
-    let searchString = "";
-    Object.keys(params).forEach((key) => {
-      searchString = searchString + `&where[${key}]=${params[key]}`;
-    });
-    searchString = searchString.replace("&", "?");
-    let res;
-    try {
-      res = await this.fetcher.get(`people?${searchString}`);
-    } catch (err) {
-      if (
-        err !== undefined &&
-        (err as Response).status.toString() === "429"
-      ) {
-        this.notify(
-          `Waiting for PCO to input more data`,
-          StatusCode.inprogress,
-        );
-        await new Promise((r) => setTimeout(r, 20000));
-        return this.search(params);
-      }
-    }
-
-    const uuids: string[] = [];
-
-    if (res !== undefined) {
-      validateObject<{ id: string }[]>(res, ["data"]).forEach((
-        elem: { id: string },
-      ) => uuids.push(elem.id));
-    }
-
-    return uuids;
-  }
-
-  /**
-   * Searches for a person in PCO via email. Operates under the name BotBot.
-   * @param {string} address - the address to search for
-   * @returns {Array} - uuids for found persons or false if not found
-   */
-  async searchOnEmail(address: string): Promise<string[]> {
-    const res = await this.getExact(`emails?where[address]=${address}`);
-    const uuids: string[] = [];
-
-    if (res) {
-      const obj = validateObject<{ relationships: { person: { data: { id: string } } } }[]>(
-        res,
-        ["data"],
-      )
-      obj.forEach(
-        (elem: { relationships: { person: { data: { id: string } } } }) =>
-          uuids.push(elem.relationships.person.data.id),
-      );
-    }
-    return uuids;
   }
 
   /**
@@ -198,7 +93,7 @@ export class People extends Pco {
    * @param {string} uuid - the person's ID from PCO (i.e., what was returned by a search)
    * @returns {any} - the person { firstName, givenName, lastName, uuid }
    */
-  async getPerson(uuid: string): Promise<Person | undefined> {
+  async getPerson(uuid: string): Promise<person | undefined> {
     const res = await this.getExact(`people/${uuid}`);
     const person = validateObject<
       {
@@ -233,7 +128,7 @@ export class People extends Pco {
     //search for person
     let uuids = [];
     try {
-      uuids = await this.searchOnEmail(email);
+      uuids = await this.PCO.People.email.searchOnEmail(email);
       this.notify("seached for uuids on email", StatusCode.success, uuids);
     } catch (err) {
       this.notify(
@@ -281,7 +176,7 @@ export class People extends Pco {
       } else {
         // must now get the names of those UUIDs (really wish PCO had sent them back the first time...) and look for the right one
         // bail out if none match since we can't make an assumption of where to send like when we only had one UUID
-        let persons: [string, Person][] = [];
+        let persons: [string, person][] = [];
         for (const id of uuids) {
           const p = await this.getPerson(id);
           if (p) persons.push([uuid, p]);
@@ -300,8 +195,8 @@ export class People extends Pco {
         );
         const filteredPersons = persons.filter(
           (person) =>
-            person[1].first.toLowerCase() === first.toLowerCase() &&
-            person[1].last.toLowerCase() === last.toLowerCase(),
+            (person[1].first.toLowerCase() === first.toLowerCase() || person[1].first.toLowerCase() === `${first.toLowerCase()} ${middle.toLowerCase()}`) &&
+            person[1].last.toLowerCase() === last.toLowerCase() || `${person[1].first.toLowerCase()} ${person[1].last.toLowerCase()}` === `${first.toLowerCase()} ${middle.toLowerCase()}`,
         );
 
         if (filteredPersons.length !== 1) {

@@ -1,16 +1,17 @@
-import { Pco } from "../index.ts";
+import { PCO } from "../pco.ts";
 import { Observer } from "../../importerWatcher.ts";
-import { validateObject } from "../../utils.ts";
+import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
+import { PcoObject } from "../pcoObject.ts"
 
 /**
  * Class Batches holds tuples of ids and names of batches that have been stored in planning center
  * It can be used to create new batches and verify that a batch exists
  */
-export class Batches extends Pco {
+export class Batches extends PcoObject {
   batches: { id: string; name: string }[];
 
-  constructor(observers: Observer[], token?: string) {
-    super(observers, "giving/v2/batches", token);
+  constructor(PCO: PCO, observers: Observer[], token?: string) {
+    super(PCO, observers, "giving/v2/batches", token);
     this.batches = [];
   }
 
@@ -55,7 +56,9 @@ export class Batches extends Pco {
 
     const res = await this.postNew(payload, "batch");
 
-    if (res === undefined) return;
+    if (res === undefined) {
+      throw new Error("res is undefined");
+    }
 
     const id = validateObject<string>(res, ["data", "id"]);
     const batchName = validateObject<string>(res, [
@@ -93,27 +96,5 @@ export class Batches extends Pco {
       batchId = batch?.id;
     }
     return batchId;
-  }
-
-  async idLookup(batchId: string): Promise<string | undefined> {
-    const batch = this.batches.find((elem) => {
-      return elem.id === batchId;
-    });
-    let batchName;
-
-    if (batch !== undefined) {
-      batchName = batch.name;
-    } else {
-      const res = await this.getExact(`/${batchId}`);
-      batchName = res
-        ? validateObject<string>(res, [
-          "data",
-          "attributes",
-          "description",
-        ])
-        : undefined;
-    }
-
-    return batchName;
   }
 }

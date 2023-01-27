@@ -1,11 +1,8 @@
-import { Batches } from "../batches.ts";
-import { Funds } from "../funds.ts";
-import { Sources } from "../sources.ts";
 import { Donation } from "./donation.ts";
-
-import { Pco } from "../../index.ts";
+import { PcoObject } from "../../pcoObject.ts"
+import { PCO } from "../../pco.ts";
 import { Observer } from "../../../importerWatcher.ts";
-import { validateObject } from "../../../utils.ts";
+import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 export enum PCO_TRANSACTION_METHODS {
   cash = "cash",
@@ -16,25 +13,19 @@ export enum PCO_TRANSACTION_METHODS {
 /**
  * Donations loads up the avaliable batches, funds, and sources so that donations can be inserted into planning center.
  */
-export class Donations extends Pco {
-  batches: Batches;
-  funds: Funds;
-  sources: Sources;
+export class Donations extends PcoObject {
 
-  constructor(observers: Observer[], token?: string) {
-    super(observers, "giving/v2/", token);
-    this.batches = new Batches(observers, token);
-    this.funds = new Funds(observers, token);
-    this.sources = new Sources(observers, token);
+  constructor(PCO: PCO, observers: Observer[], token?: string) {
+    super(PCO, observers, "giving/v2/", token);
   }
 
   /**
    * Setup must be run before any other method. It loads all the data needed from planning center.
    */
   async setup(): Promise<void> {
-    await this.batches.loadBatches();
-    await this.funds.loadfunds();
-    await this.sources.loadsources();
+    await this.PCO.Giving.batches.loadBatches();
+    await this.PCO.Giving.funds.loadfunds();
+    await this.PCO.Giving.sources.loadsources();
   }
 
   /**
@@ -55,13 +46,13 @@ export class Donations extends Pco {
    * @returns {Promise<string>} - uuid of donation created
    */
   async postDonation(donation: Donation): Promise<string | undefined> {
-    const batchId = await this.batches.handleBatch(donation.batch);
+    const batchId = await this.PCO.Giving.batches.handleBatch(donation.batch);
 
     const payload = {
       data: {
         type: "Donation",
         attributes: {
-          payment_source_id: this.sources.handleSource(donation.source),
+          payment_source_id: this.PCO.Giving.sources.handleSource(donation.source),
           payment_method: this.handleMethod(donation.method),
           received_at: donation.date,
           person_id: donation.uuid,
@@ -76,7 +67,7 @@ export class Donations extends Pco {
             fund: {
               data: {
                 type: "Fund",
-                id: `${this.funds.handleFund(donation.fund)}`,
+                id: `${this.PCO.Giving.funds.handleFund(donation.fund)}`,
               },
             },
           },

@@ -1,16 +1,19 @@
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
-import { validateObject } from "../utils.ts";
-import { axil } from "../axil.ts";
+import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
+import { axil } from "https://deno.land/x/axil@v0.0.1/axil.ts";
+import { PCO } from "./pco.ts";
 
-export class Pco extends Subject {
+export class PcoObject extends Subject {
   fetcher: axil;
+  PCO: PCO
 
-  constructor(observers: Observer[], axiosURL: string, token?: string) {
+  constructor(PCO: PCO, observers: Observer[], axiosURL: string, token?: string) {
     super(observers);
-    const baseURL = `https://api.planningcenteronline.com/${axiosURL}`
+    const baseURL = `https://api.planningcenteronline.com/${axiosURL}`;
     const Authorization = token ? `Bearer ${token}` : "Basic " +
-        btoa(`${Deno.env.get("PCOID")}:${Deno.env.get("PCOS")}`);
+      btoa(`${Deno.env.get("PCOID")}:${Deno.env.get("PCOS")}`);
     this.fetcher = new axil(baseURL, new Headers({ Authorization }));
+    this.PCO = PCO
   }
 
   async getExact(uriAddOn: string): Promise<Response | undefined> {

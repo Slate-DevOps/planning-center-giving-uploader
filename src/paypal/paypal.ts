@@ -1,4 +1,4 @@
-import { validateObject } from "../utils.ts";
+import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 function diffDays(day1: Date, day2: Date): number {
   const diff = day1.valueOf() - day2.valueOf();
