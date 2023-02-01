@@ -13,7 +13,6 @@ const mailtext = {
 };
 
 const ppCsvPath = `file://${__dirname}../data/${Deno.env.get("PAYDATA")}`;
-// const t2tCsvPath = `file://${__dirname}../data/${Deno.env.get("T2TDATA")}`;
 const uniCsvPath = `C:/Users/ljjb9/Documents/Slate Church/terence/DenoTerence/data/${Deno.env.get("UNIDATA")}`;
 const t2tCsvPath =
   `C:/Users/ljjb9/Documents/Slate Church/terence/DenoTerence/data/${Deno.env.get("T2TDATA")}`;

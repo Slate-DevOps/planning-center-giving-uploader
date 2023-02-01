@@ -9,7 +9,6 @@ export class People{
     person: Person;
 
     constructor(PCO: PCO, observers: Observer[], token?: string){
-        console.log("We made it!")
         this.email = new Email(PCO, observers, token);
         this.person = new Person(PCO, observers, token);
     }

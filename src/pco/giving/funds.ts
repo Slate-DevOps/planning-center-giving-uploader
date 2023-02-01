@@ -9,7 +9,6 @@ export class Funds extends PcoObject {
   funds: { id: string; name: string }[];
 
   constructor(PCO: PCO, observers: Observer[], token?: string) {
-    console.log("We're Here!")
     super(PCO, observers, "giving/v2/funds", token);
     this.funds = [];
   }
