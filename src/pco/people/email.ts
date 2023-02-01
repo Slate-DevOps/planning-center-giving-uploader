@@ -51,6 +51,12 @@ export class Email extends PcoObject {
           uuids.push(elem.relationships.person.data.id),
       );
     }
-    return uuids;
+
+    // Remove duplicates (this happens if the same email address is attached to the same profile twice)
+    var unique_uuids = uuids.filter(function(elem, index, self) {
+        return index === self.indexOf(elem);
+    })
+
+    return unique_uuids;
   }
 }

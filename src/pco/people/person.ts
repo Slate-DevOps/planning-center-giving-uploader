@@ -199,13 +199,6 @@ export class Person extends PcoObject {
             person[1].last.toLowerCase() === last.toLowerCase() || `${person[1].first.toLowerCase()} ${person[1].last.toLowerCase()}` === `${first.toLowerCase()} ${middle.toLowerCase()}`,
         );
 
-        for (const person of filteredPersons) {
-          this.notify(
-            `(After Filtering) First name: ${person.first}, Given name: ${person.given}, Last name: ${person.last}, UUID: ${person.uuid}, Child: ${person.child}`,
-            StatusCode.error,
-          );
-        }
-
         if (filteredPersons.length !== 1) {
           if (filteredPersons.length > 1) {
             this.notify(
