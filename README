@@ -1,0 +1,1 @@
+To run this locally, make sure that `PCOID` and `PCOS` are exported to your environment and then run `deno run -A ./src/deploy/main.tsx`.

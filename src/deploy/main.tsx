@@ -26,13 +26,20 @@ const options = {
   scopes: 'people+giving', // Scopes limit access for OAuth tokens.
 };
 
-const url = Deno.env.get('URL');
 const port = 4444;
+var url = Deno.env.get('URL');
+var redirect_uri;
+if (url) {
+  redirect_uri = `${url}/auth/complete`;
+} else {
+  url = `http://localhost`;
+  redirect_uri = `${url}:${port}/auth/complete`;
+}
 const api_url = 'https://api.planningcenteronline.com/oauth/authorize'
 
 const authUrl = new URL(api_url);
 authUrl.searchParams.append("client_id", options.client_id)
-authUrl.searchParams.append("redirect_uri", `${url}/auth/complete`);
+authUrl.searchParams.append("redirect_uri", redirect_uri);
 authUrl.searchParams.append("response_type", 'code')
 authUrl.searchParams.append("scope", '')
 
