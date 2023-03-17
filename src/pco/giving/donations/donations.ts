@@ -102,6 +102,6 @@ export class Donations extends PcoObject {
     if (method in PCO_TRANSACTION_METHODS) {
       return method;
     }
-    throw Error("Invalid Method");
+    throw Error(`Invalid Method: ${method}`);
   }
 }
