@@ -76,12 +76,13 @@ export class Donations extends PcoObject {
       ],
     };
 
-    const res = await this.postNew(
-      payload,
-      "Donation",
-      `batches/${batchId}/donations?include=designations,labels`,
-    );
-    return res ? validateObject<string>(res, ["data", "id"]) : undefined;
+    throw Error(`payload: ${JSON.stringify(payload)}`); // TODO: remove this
+    // const res = await this.postNew(
+    //   payload,
+    //   "Donation",
+    //   `batches/${batchId}/donations?include=designations,labels`,
+    // );
+    // return res ? validateObject<string>(res, ["data", "id"]) : undefined;
   }
 
   async getMostRecent(sourceID: string): Promise<string | undefined> {
