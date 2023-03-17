@@ -36,12 +36,18 @@ export class Funds extends PcoObject {
    * @returns {number} the ID number belonging to the fund of name
    */
   handleFund(fund: string): number {
-    const fundId = this.funds.find((elem) => elem.name === fund);
+    // Transform something like 'Tithes & Offerings' to 'tithes-offerings'
+    const fundId = this.funds.find(
+      (elem) =>
+        fund === elem.name.replace(/[^\w\s]|_/g, '') // remove non-alphanumeric characters
+                          .replace(/\s+/g, '-')      // replace consecutive whitespace with a single dash
+                          .toLowerCase()             // convert the resulting string to lowercase
+    );
 
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      throw new Error(`Fund with name ${fund} does not exist`);
+      throw new Error(`Fund with name ${fund} does not exist in ${this.funds.map(elem => elem.name).join()}`);
     }
   }
 }

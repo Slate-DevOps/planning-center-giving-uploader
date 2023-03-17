@@ -33,7 +33,7 @@ export class Email extends PcoObject {
   /**
    * Searches for a person in PCO via email. Operates under the name BotBot.
    * @param {string} address - the address to search for
-   * @returns {Array} - uuids for found persons or false if not found
+   * @returns {Array} - uuids for found persons
    */
   async searchOnEmail(address: string): Promise<string[]> {
     const res = await this.getExact(`emails?where[address]=${address}`);
@@ -53,10 +53,35 @@ export class Email extends PcoObject {
     }
 
     // Remove duplicates (this happens if the same email address is attached to the same profile twice)
-    var unique_uuids = uuids.filter(function(elem, index, self) {
+    const unique_uuids = uuids.filter(function(elem, index, self) {
         return index === self.indexOf(elem);
     })
 
     return unique_uuids;
+  }
+
+  /**
+   * Searches for a person in PCO via name. Operates under the name BotBot.
+   * @param {string} name - the name to search for
+   * @returns {Array} - uuids for found persons
+   */
+  async searchOnName(name: string): Promise<string[]> {
+    const res = await this.getExact(`people?where[search_name]=${name}`);
+    const uuids: string[] = [];
+
+    if (res) {
+      const obj = validateObject<
+        { id: string } []
+      >(
+        res,
+        ["data"],
+      );
+      obj.forEach(
+        (elem: { id: string }) =>
+          uuids.push(elem.id),
+      );
+    }
+
+    return uuids;
   }
 }

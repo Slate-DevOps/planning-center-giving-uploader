@@ -99,9 +99,12 @@ export class Donations extends PcoObject {
 
   handleMethod(method: string): string {
     method = method.toLowerCase();
+    if (method == 'cheque') {
+      return 'check';
+    }
     if (method in PCO_TRANSACTION_METHODS) {
       return method;
     }
-    throw Error("Invalid Method");
+    throw Error(`Invalid Method: ${method}`);
   }
 }
