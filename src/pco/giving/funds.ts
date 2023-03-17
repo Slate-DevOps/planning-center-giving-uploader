@@ -41,7 +41,7 @@ export class Funds extends PcoObject {
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      throw new Error(`Fund with name ${fund} does not exist`);
+      throw new Error(`Fund with name ${fund} does not exist in ${this.funds}`);
     }
   }
 }
