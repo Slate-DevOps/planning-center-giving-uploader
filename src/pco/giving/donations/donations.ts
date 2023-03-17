@@ -8,7 +8,6 @@ export enum PCO_TRANSACTION_METHODS {
   cash = "cash",
   card = "card",
   check = "check",
-  cheque = "cheque", // Used by The City Church
 }
 
 /**
@@ -76,13 +75,12 @@ export class Donations extends PcoObject {
       ],
     };
 
-    throw Error(`payload: ${JSON.stringify(payload)}`); // TODO: remove this
-    // const res = await this.postNew(
-    //   payload,
-    //   "Donation",
-    //   `batches/${batchId}/donations?include=designations,labels`,
-    // );
-    // return res ? validateObject<string>(res, ["data", "id"]) : undefined;
+    const res = await this.postNew(
+      payload,
+      "Donation",
+      `batches/${batchId}/donations?include=designations,labels`,
+    );
+    return res ? validateObject<string>(res, ["data", "id"]) : undefined;
   }
 
   async getMostRecent(sourceID: string): Promise<string | undefined> {
@@ -101,6 +99,9 @@ export class Donations extends PcoObject {
 
   handleMethod(method: string): string {
     method = method.toLowerCase();
+    if (method == 'cheque') {
+      return 'check';
+    }
     if (method in PCO_TRANSACTION_METHODS) {
       return method;
     }
