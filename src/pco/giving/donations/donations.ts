@@ -8,6 +8,7 @@ export enum PCO_TRANSACTION_METHODS {
   cash = "cash",
   card = "card",
   check = "check",
+  cheque = "cheque", // Used by The City Church
 }
 
 /**
