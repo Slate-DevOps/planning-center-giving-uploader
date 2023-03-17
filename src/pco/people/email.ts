@@ -71,14 +71,14 @@ export class Email extends PcoObject {
 
     if (res) {
       const obj = validateObject<
-        { relationships: { person: { data: { id: string } } } }[]
+        { id: string } []
       >(
         res,
         ["data"],
       );
       obj.forEach(
-        (elem: { relationships: { person: { data: { id: string } } } }) =>
-          uuids.push(elem.relationships.person.data.id),
+        (elem: { id: string }) =>
+          uuids.push(elem.id),
       );
     }
 
