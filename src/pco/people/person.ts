@@ -241,15 +241,14 @@ export class Person extends PcoObject {
       this.notify("seached for uuids on name", StatusCode.success, uuids);
     } catch (err) {
       this.notify(
-        `Error searching for name matching ${fullName}`,
+        `Unable to find existing person with name matching ${fullName}`,
         StatusCode.error,
         err,
       );
-      throw Error(`Error searching for name matching ${fullName}`);
     }
     let uuid = "";
 
-    //Found an exact one match
+    // Found an exact one match
     if (uuids.length === 1) {
       uuid = uuids[0];
     } else {
