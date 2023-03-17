@@ -143,26 +143,29 @@ export class Importer extends Subject{
         validateProperty<string>(row, ["Last Name"]);
     }
 
-    const email = validateProperty<string>(row, [
-      "email",
-      "email address",
-    ]);
+    let email = "";
+    try {
+      email = validateProperty<string>(row, [
+        "email",
+        "email address",
+      ]);
+    } catch (_err) { }
 
-    if (fullName) {
-      try {
-        uuid = await this.PCO.People.person.getUUID(fullName, email);
-        this.notify("uuid found", StatusCode.success);
-      } catch (err) {
-        this.notify(
-          "error encountered during uuid search",
-          StatusCode.error,
-          err,
-        );
-        throw Error("error encountered during uuid search");
-      }
-    } else {
+    if (!fullName) {
       this.notify("Row missing full name", StatusCode.error);
       throw Error("Row missing full name");
+    }
+    
+    try {
+      uuid = await this.PCO.People.person.getUUID(fullName, email);
+      this.notify("uuid found", StatusCode.success);
+    } catch (err) {
+      this.notify(
+        "error encountered during uuid search",
+        StatusCode.error,
+        err,
+      );
+      throw Error("error encountered during uuid search");
     }
 
     const amount = validateProperty<number>(row, ["Amount", "Total Paid", " Amount "]);

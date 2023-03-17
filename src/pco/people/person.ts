@@ -125,6 +125,10 @@ export class Person extends PcoObject {
    * @returns {Promise<string>} the PCO UUID
    */
   async getUUID(fullName: string, email: string): Promise<string> {
+    if (email == "") {
+      return this.getUUIDFromName(fullName);
+    }
+
     //search for person
     let uuids = [];
     try {
@@ -217,6 +221,67 @@ export class Person extends PcoObject {
       `Found person with email matching ${email}, ${uuid}`,
       StatusCode.success,
     );
+    return uuid;
+  }
+
+  /**
+   * getUUIDFromName gets the PCO UUID given a full name. It attempts to parse the full name into first, middle, and last as makes sense.
+   * SIDE EFFECT: if the person does not exist, the function will create them.
+   *
+   * @param {string} fullName
+   *
+   * @returns {Promise<string>} the PCO UUID
+   */
+  async getUUIDFromName(fullName: string): Promise<string> {
+
+    //search for person
+    let uuids = [];
+    try {
+      uuids = await this.PCO.People.email.searchOnName(fullName);
+      this.notify("seached for uuids on name", StatusCode.success, uuids);
+    } catch (err) {
+      this.notify(
+        `Error searching for name matching ${fullName}`,
+        StatusCode.error,
+        err,
+      );
+      throw Error(`Error searching for name matching ${fullName}`);
+    }
+    let uuid = "";
+
+    //Found an exact one match
+    if (uuids.length === 1) {
+      uuid = uuids[0];
+    } else {
+      // get first, middle, last names from payment
+      let first = "",
+        middle = "",
+        last = "";
+
+      const split = fullName.split(" ");
+      if (split.length === 1) {
+        last = split[0];
+      } else if (split.length === 2) {
+        first = split[0];
+        last = split[1];
+      } else {
+        first = split[0];
+        middle = split[1];
+        last = split[2];
+      }
+
+      try {
+        uuid = await this.create({ first, last, birthday: "", email: "", middle });
+      } catch (err) {
+        this.notify(
+          `Error creating new person for with name ${fullName}`,
+          StatusCode.error,
+          err,
+        );
+        throw Error(`Error creating new person for with name ${fullName}`);
+      }
+    }
+
     return uuid;
   }
 }
