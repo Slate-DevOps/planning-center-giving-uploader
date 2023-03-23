@@ -37,12 +37,12 @@ export class Funds extends PcoObject {
    */
   handleFund(fund: string): number {
     // Transform something like 'Tithes & Offerings' to 'tithes-offerings'
-    const fundId = this.funds.find(
-      (elem) =>
-        fund === elem.name.replace(/[^\w\s]|_/g, '') // remove non-alphanumeric characters
-                          .replace(/\s+/g, '-')      // replace consecutive whitespace with a single dash
-                          .toLowerCase()             // convert the resulting string to lowercase
-    );
+    const canonicalize = function(name: string) {
+      return name.replace(/[^\w\s]|_/g, '') // remove non-alphanumeric characters
+                 .replace(/\s+/g, '-')      // replace consecutive whitespace with a single dash
+                 .toLowerCase()             // convert the resulting string to lowercase
+    };
+    const fundId = this.funds.find((elem) => canonicalize(fund) === canonicalize(elem.name));
 
     if (fundId) {
       return parseInt(fundId.id);
