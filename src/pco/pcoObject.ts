@@ -1,4 +1,4 @@
-import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
+import { ErrorCode, Observer, StatusCode, Subject } from "../importerWatcher.ts";
 import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 import { axil } from "https://deno.land/x/axil@v0.0.1/axil.ts";
 import { PCO } from "./pco.ts";
@@ -97,11 +97,6 @@ export class PcoObject extends Subject {
     }
     try {
       const res = await this.fetcher.post(uriAddOn, payload);
-      this.notify(
-        `Created new ${objectName} in Planning center`,
-        StatusCode.created,
-        res,
-      );
       return res;
     } catch (err) {
       if (err && (err as Response).status.toString() === "429") {

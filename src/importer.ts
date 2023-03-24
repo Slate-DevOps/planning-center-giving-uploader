@@ -1,11 +1,10 @@
-import { getTransactions } from "./paypal/paypal.ts";
 import { Observer, StatusCode, Subject } from "./importerWatcher.ts";
 import { PCO } from "./pco/pco.ts";
 import * as ssf from "https://cdn.skypack.dev/ssf?dts";
 import { xlsx } from "../denoReplacements/xlsx.ts";
 const { read, utils } = xlsx;
 import { Donation } from "./pco/giving/donations/donation.ts";
-import { validateObject, validateProperty } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
+import { validateProperty } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 /**
  * Importer class provides a way to import some csv files containing donation info into PCO or pull new donations from PayPal.
@@ -36,29 +35,7 @@ export class Importer extends Subject{
     return this.PCO.Giving.donations.setup();
   }
 
-  private async parseAndPost(args: {
-    path: string;
-    batch?: string;
-    source?: string;
-    method?: string;
-    fund?: string;
-  }): Promise<void> {
-    this.notify("loading file", StatusCode.inprogress);
-    const fileData = await Deno.readFile(args.path);
-    const workBook = read(fileData, { type: "buffer" });
-    for (const sheet in workBook.Sheets) {
-      await this.postData({
-        jsonData: utils.sheet_to_json(workBook.Sheets[sheet]),
-        batch: args.batch,
-        source: args.source,
-        method: args.method,
-        fund: args.fund,
-      });
-    }
-    this.notify("file loaded", StatusCode.success);
-  }
-
-  private async parseDataAndPost(args: {
+  async parseDataAndPost(args: {
     data: string;
     batch?: string;
     source?: string;
@@ -68,7 +45,6 @@ export class Importer extends Subject{
     if (!this.IsSetup) {
       await this.setup();
     }
-    this.notify("loading file", StatusCode.inprogress);
     const enc = new TextEncoder();
     const workBook = read(enc.encode(args.data), { type: "buffer" });
     for (const sheet in workBook.Sheets) {
@@ -80,7 +56,6 @@ export class Importer extends Subject{
         fund: args.fund,
       });
     }
-    this.notify("file loaded", StatusCode.success);
   }
 
   private async postData(args: {
@@ -102,7 +77,7 @@ export class Importer extends Subject{
       } catch (err) {
         this.notify(
           "error encountered during donation creation",
-          StatusCode.error,
+          StatusCode.error_donation,
           err,
         );
         continue;
@@ -110,14 +85,18 @@ export class Importer extends Subject{
 
       try {
         await this.PCO.Giving.donations.postDonation(donation);
-        this.notify("successfully imported donation", StatusCode.success);
       } catch (err) {
         this.notify(
           "error encountered during donation upload",
-          StatusCode.error,
+          StatusCode.error_donation,
           err,
         );
       }
+
+      this.notify(
+        "successfully uploaded donation",
+        StatusCode.success_donation,
+      );
     }
   }
 
@@ -149,7 +128,9 @@ export class Importer extends Subject{
         "email",
         "email address",
       ]);
-    } catch (_err) { }
+    } catch (_err) {
+      // Tolerate missing email address
+    }
 
     if (!fullName) {
       this.notify("Row missing full name", StatusCode.error);
@@ -158,7 +139,6 @@ export class Importer extends Subject{
     
     try {
       uuid = await this.PCO.People.person.getUUID(fullName, email);
-      this.notify("uuid found", StatusCode.success);
     } catch (err) {
       this.notify(
         "error encountered during uuid search",
@@ -199,92 +179,5 @@ export class Importer extends Subject{
       amount * 100,
       args.fund,
     );
-  }
-
-  /**
-   * Reads donation data from a csv file in the format provided by PayPal
-   * @param path Path to a csv file to be imported
-   * @returns A promise that completes when all data has been imported
-   */
-  async readDataPP(path: string): Promise<void> {
-    if (!this.IsSetup) {
-      await this.setup();
-    }
-    const batch = `[imported] PayPal data imported on ${
-      new Date().toDateString()
-    }`;
-    await this.parseAndPost({
-      path: path,
-      batch,
-      source: "PayPal",
-      method: "card",
-      fund: "general",
-    });
-  }
-
-  /**
-   * This method pulls data from planning center to try to determine the most recent PayPal donation. It then uses
-   * the PayPal API to grab all transactions that occur after the last PayPal donation. The donations are then put into planning center
-   * @returns
-   */
-  async getPayPal(): Promise<void> {
-    if (!this.IsSetup) {
-      this.notify("Loading in PCO data", StatusCode.inprogress);
-      await this.setup();
-    }
-
-    //Find the most recent
-    this.notify(
-      "Getting Most recent PayPal Donation from PCO",
-      StatusCode.inprogress,
-    );
-    const mostRecent = await this.PCO.Giving.donations.getMostRecent("3022");
-    const res = await this.PCO.Giving.donations.getExact(`donations/${mostRecent}`);
-
-    if (!res) {
-      throw Error("Error fetching donation");
-    }
-
-    const RecDate = new Date(
-      validateObject<string>(res, [
-        "data",
-        "attributes",
-        "received_at",
-      ]),
-    );
-    const CurDate = new Date();
-    this.notify("Getting Donations from Paypal", StatusCode.inprogress);
-    const data = await getTransactions(RecDate.toISOString());
-    const batch =
-      `PayPal import from ${RecDate.toISOString()} to ${CurDate.toISOString()} [API]`;
-
-    await this.postData({
-      jsonData: data,
-      batch,
-      source: "PayPal",
-      method: "card",
-      fund: "general",
-    });
-  }
-
-  async readDataT2T(path: string): Promise<void> {
-    if (!this.IsSetup) {
-      await this.setup();
-    }
-    const batch = `[imported] T2T imported on ${new Date().toDateString()}`;
-    await this.parseAndPost({
-      path: path,
-      batch,
-      source: "TextToTithe",
-      method: "card",
-    });
-  }
-
-  async readDataUni(path: string): Promise<void> {
-    if (!this.IsSetup) {
-      await this.setup();
-    }
-
-    await this.parseAndPost({ path: path });
   }
 }
