@@ -19,7 +19,7 @@ class ErrorReporter implements Observer {
   ): void {
     if(code === StatusCode.error){
       this.socket.send(JSON.stringify({update: true, value: renderSSR(<App />), script: `
-        console.log("error reported");`}));
+        console.log("error reported: ${message}");`}));
     }
   }
 }
