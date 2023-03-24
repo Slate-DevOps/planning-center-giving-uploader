@@ -28,6 +28,9 @@ class ErrorReporter implements Observer {
       case StatusCode.success_donation:
         script = `console.log("donation uploaded: ${message}");`;
         break;
+      case StatusCode.error_duplicate_profile:
+        script = `alert("${message}");`;
+        break;
     }
     if (script) {
       this.socket.send(JSON.stringify({update: true, value: renderSSR(<App />), script: script}));

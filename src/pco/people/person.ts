@@ -198,14 +198,18 @@ export class Person extends PcoObject {
             person[1].last.toLowerCase() === last.toLowerCase() || `${person[1].first.toLowerCase()} ${person[1].last.toLowerCase()}` === `${first.toLowerCase()} ${middle.toLowerCase()}`,
         );
 
-        if (filteredPersons.length !== 1) {
-          if (filteredPersons.length > 1) {
-            this.notify(
-              `Multiple people with name matching: ${fullName} and email: ${email} \nConsider merging their profiles before re-running import`,
-              StatusCode.error,
-            );
-          }
-          throw Error(`Error: unable to locate uuid for ${first} ${middle} ${last}`);
+        if (filteredPersons.length == 0) {
+          this.notify(
+            `Multiple people had the email '${email}' attached to their profile, but it's unclear which profile is the correct one.`,
+            StatusCode.error_duplicate_profile,
+          );
+          throw Error(`Error: unable to locate uuid for '${first} ${middle} ${last}' and '${email}'`);
+        } else if (filteredPersons.length > 1) {
+          this.notify(
+            `Multiple people were named '${fullName}' and had the email '${email}'. Consider merging their profiles before re-running the import.`,
+            StatusCode.error_duplicate_profile,
+          );
+          throw Error(`Error: unable to locate uuid for '${first} ${middle} ${last}' and '${email}'`);
         }
 
         uuid = filteredPersons[0][1].uuid;
