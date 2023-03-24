@@ -210,7 +210,7 @@ export class Person extends PcoObject {
               StatusCode.error,
             );
           }
-          throw Error(`Error: unable to locate uuid ${filteredPersons}`);
+          throw Error(`Error: unable to locate uuid for ${first} ${middle} ${last}`);
         }
 
         uuid = filteredPersons[0][1].uuid;
