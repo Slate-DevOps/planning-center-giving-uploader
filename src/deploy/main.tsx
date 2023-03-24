@@ -4,7 +4,13 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 
-class obsNothing implements Observer {
+class ErrorReporter implements Observer {
+  socket: WebSocket;
+
+  constructor(socket: WebSocket) {
+    this.socket = socket;
+  }
+
   update(
     _from: Subject,
     message: string,
@@ -12,10 +18,8 @@ class obsNothing implements Observer {
     object?: unknown,
   ): void {
     if(code === StatusCode.error){
-      console.log(`Message: ${message}\nCode: ${code}\n`);
-      if (object) {
-        console.log(object);
-      }
+      this.socket.send(JSON.stringify({update: true, value: renderSSR(<App />), script: `
+        console.log("error reported");`}));
     }
   }
 }
@@ -90,8 +94,7 @@ router.get("/load", async (ctx) => {
         }
       </style>
       <script>
-        console.log("test")
-        //This script can be moved into a seperate file later (github)
+        //This script can be moved into a separate file later
         const ws = new WebSocket('${url.replace("http", "ws")}/ws');
         ws.onopen = function() {
           ws.send(JSON.stringify({endpoint: "form"}));
@@ -134,7 +137,7 @@ router.get('/ws', async ctx => {
   });`}));
     }
     if(data.endpoint === "submit"){
-      const importer = new Importer([new obsNothing()], token);
+      const importer = new Importer([new ErrorReporter(sock)], token);
       if(data.value.template === "T2T"){
         try {
           await importer.parseDataAndPost({data: data.value.file, batch: `[imported] T2T imported on ${new Date().toDateString()}`, source: `TextToTithe`, method: `card`});
