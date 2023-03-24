@@ -20,26 +20,17 @@ export class Subject {
     message: string,
     code: StatusCode,
     object?: unknown,
-    errorCode?: ErrorCode,
   ): void {
     for (const obs of this.observers) {
-      obs.update(this, message, code, object, errorCode);
+      obs.update(this, message, code, object);
     }
   }
 }
 
 export enum StatusCode {
-  success = 1,
-  inprogress = 2,
-  error = 3,
-  created = 4,
-  read = 5,
-  updated = 6,
-  deleted = 7,
-}
-
-export enum ErrorCode {
-  generic = 1,
+  error = 1,
+  error_donation = 2,
+  success_donation = 100,
 }
 
 /**
@@ -52,7 +43,6 @@ export interface Observer {
     message: string,
     code: StatusCode,
     object?: unknown,
-    errorCode?: ErrorCode,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
   ): void;
 }

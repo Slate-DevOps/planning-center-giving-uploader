@@ -1,4 +1,4 @@
-import { Observer, StatusCode, ErrorCode } from "../../importerWatcher.ts";
+import { Observer, StatusCode } from "../../importerWatcher.ts";
 import { PCO } from "../pco.ts";
 import { formatDate, validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 import { PcoObject } from "../pcoObject.ts"
@@ -133,13 +133,11 @@ export class Person extends PcoObject {
     let uuids = [];
     try {
       uuids = await this.PCO.People.email.searchOnEmail(email);
-      this.notify("seached for uuids on email", StatusCode.success, uuids);
     } catch (err) {
       this.notify(
         `Error searching for email matching ${email}`,
         StatusCode.error,
         err,
-        ErrorCode.generic,
       );
       throw Error(`Error searching for email matching ${email}`);
     }
@@ -175,7 +173,6 @@ export class Person extends PcoObject {
             `Error creating new person for with email ${email}`,
             StatusCode.error,
             err,
-            ErrorCode.generic,
           );
           throw Error(`Error creating new person for with email ${email}`);
         }
@@ -189,10 +186,6 @@ export class Person extends PcoObject {
         }
         persons = persons.filter((person) => !person[1].child);
         if (persons.length === 1) {
-          this.notify(
-            `Found person with email matching ${email}, ${persons[0][1].uuid}`,
-            StatusCode.success,
-          );
           return persons[0][1].uuid;
         }
 
@@ -210,8 +203,6 @@ export class Person extends PcoObject {
             this.notify(
               `Multiple people with name matching: ${fullName} and email: ${email} \nConsider merging their profiles before re-running import`,
               StatusCode.error,
-              null,
-              ErrorCode.generic,
             );
           }
           throw Error(`Error: unable to locate uuid for ${first} ${middle} ${last}`);
@@ -220,11 +211,6 @@ export class Person extends PcoObject {
         uuid = filteredPersons[0][1].uuid;
       }
     }
-
-    this.notify(
-      `Found person with email matching ${email}, ${uuid}`,
-      StatusCode.success,
-    );
     return uuid;
   }
 
@@ -242,13 +228,11 @@ export class Person extends PcoObject {
     let uuids = [];
     try {
       uuids = await this.PCO.People.email.searchOnName(fullName);
-      this.notify("seached for uuids on name", StatusCode.success, uuids);
     } catch (err) {
       this.notify(
         `Unable to find existing person with name matching ${fullName}`,
         StatusCode.error,
         err,
-        ErrorCode.generic,
       );
     }
     let uuid = "";
@@ -281,7 +265,6 @@ export class Person extends PcoObject {
           `Error creating new person for with name ${fullName}`,
           StatusCode.error,
           err,
-          ErrorCode.generic,
         );
         throw Error(`Error creating new person for with name ${fullName}`);
       }

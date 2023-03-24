@@ -1,4 +1,4 @@
-import { Observer, StatusCode, Subject, ErrorCode } from "./importerWatcher.ts";
+import { Observer, StatusCode, Subject } from "./importerWatcher.ts";
 import { PCO } from "./pco/pco.ts";
 import * as ssf from "https://cdn.skypack.dev/ssf?dts";
 import { xlsx } from "../denoReplacements/xlsx.ts";
@@ -45,7 +45,6 @@ export class Importer extends Subject{
     if (!this.IsSetup) {
       await this.setup();
     }
-    this.notify("loading file", StatusCode.inprogress);
     const enc = new TextEncoder();
     const workBook = read(enc.encode(args.data), { type: "buffer" });
     for (const sheet in workBook.Sheets) {
@@ -57,7 +56,6 @@ export class Importer extends Subject{
         fund: args.fund,
       });
     }
-    this.notify("file loaded", StatusCode.success);
   }
 
   private async postData(args: {
@@ -79,24 +77,26 @@ export class Importer extends Subject{
       } catch (err) {
         this.notify(
           "error encountered during donation creation",
-          StatusCode.error,
+          StatusCode.error_donation,
           err,
-          ErrorCode.generic,
         );
         continue;
       }
 
       try {
         await this.PCO.Giving.donations.postDonation(donation);
-        this.notify("successfully imported donation", StatusCode.success);
       } catch (err) {
         this.notify(
           "error encountered during donation upload",
-          StatusCode.error,
+          StatusCode.error_donation,
           err,
-          ErrorCode.generic,
         );
       }
+
+      this.notify(
+        "successfully uploaded donation",
+        StatusCode.success_donation,
+      );
     }
   }
 
@@ -128,22 +128,22 @@ export class Importer extends Subject{
         "email",
         "email address",
       ]);
-    } catch (_err) { }
+    } catch (_err) {
+      // Tolerate missing email address
+    }
 
     if (!fullName) {
-      this.notify("Row missing full name", StatusCode.error, null, ErrorCode.generic);
+      this.notify("Row missing full name", StatusCode.error);
       throw Error("Row missing full name");
     }
     
     try {
       uuid = await this.PCO.People.person.getUUID(fullName, email);
-      this.notify("uuid found", StatusCode.success);
     } catch (err) {
       this.notify(
         "error encountered during uuid search",
         StatusCode.error,
         err,
-        ErrorCode.generic,
       );
       throw Error("error encountered during uuid search");
     }

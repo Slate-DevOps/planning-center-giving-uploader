@@ -30,7 +30,6 @@ export class PcoObject extends Subject {
           }`,
           StatusCode.error,
           err,
-          ErrorCode.generic,
         );
         return;
       }
@@ -98,11 +97,6 @@ export class PcoObject extends Subject {
     }
     try {
       const res = await this.fetcher.post(uriAddOn, payload);
-      this.notify(
-        `Created new ${objectName} in Planning center`,
-        StatusCode.created,
-        res,
-      );
       return res;
     } catch (err) {
       if (err && (err as Response).status.toString() === "429") {
@@ -115,7 +109,6 @@ export class PcoObject extends Subject {
           }`,
           StatusCode.error,
           err,
-          ErrorCode.generic,
         );
         throw Error(
           `Error posting new ${objectName} in Planning center to ${
