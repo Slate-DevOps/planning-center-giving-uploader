@@ -1,4 +1,4 @@
-import { Observer, StatusCode } from "../../importerWatcher.ts";
+import { Observer, StatusCode, ErrorCode } from "../../importerWatcher.ts";
 import { PCO } from "../pco.ts";
 import { formatDate, validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 import { PcoObject } from "../pcoObject.ts"
@@ -139,6 +139,7 @@ export class Person extends PcoObject {
         `Error searching for email matching ${email}`,
         StatusCode.error,
         err,
+        ErrorCode.generic,
       );
       throw Error(`Error searching for email matching ${email}`);
     }
@@ -174,6 +175,7 @@ export class Person extends PcoObject {
             `Error creating new person for with email ${email}`,
             StatusCode.error,
             err,
+            ErrorCode.generic,
           );
           throw Error(`Error creating new person for with email ${email}`);
         }
@@ -208,6 +210,8 @@ export class Person extends PcoObject {
             this.notify(
               `Multiple people with name matching: ${fullName} and email: ${email} \nConsider merging their profiles before re-running import`,
               StatusCode.error,
+              null,
+              ErrorCode.generic,
             );
           }
           throw Error(`Error: unable to locate uuid for ${first} ${middle} ${last}`);
@@ -244,6 +248,7 @@ export class Person extends PcoObject {
         `Unable to find existing person with name matching ${fullName}`,
         StatusCode.error,
         err,
+        ErrorCode.generic,
       );
     }
     let uuid = "";
@@ -276,6 +281,7 @@ export class Person extends PcoObject {
           `Error creating new person for with name ${fullName}`,
           StatusCode.error,
           err,
+          ErrorCode.generic,
         );
         throw Error(`Error creating new person for with name ${fullName}`);
       }

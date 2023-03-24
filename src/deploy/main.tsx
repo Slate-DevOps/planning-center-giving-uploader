@@ -2,7 +2,7 @@
 import { h, renderSSR, Component } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
-import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
+import { Observer, StatusCode, Subject, ErrorCode } from "../importerWatcher.ts";
 
 class ErrorReporter implements Observer {
   socket: WebSocket;
@@ -16,8 +16,9 @@ class ErrorReporter implements Observer {
     message: string,
     code: StatusCode,
     object?: unknown,
+    errorCode?: ErrorCode,
   ): void {
-    if(code === StatusCode.error){
+    if (code === StatusCode.error) {
       this.socket.send(JSON.stringify({update: true, value: renderSSR(<App />), script: `
         console.log("error reported: ${message}");`}));
     }

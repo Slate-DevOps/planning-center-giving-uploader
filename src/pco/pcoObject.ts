@@ -1,4 +1,4 @@
-import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
+import { ErrorCode, Observer, StatusCode, Subject } from "../importerWatcher.ts";
 import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 import { axil } from "https://deno.land/x/axil@v0.0.1/axil.ts";
 import { PCO } from "./pco.ts";
@@ -30,6 +30,7 @@ export class PcoObject extends Subject {
           }`,
           StatusCode.error,
           err,
+          ErrorCode.generic,
         );
         return;
       }
@@ -114,6 +115,7 @@ export class PcoObject extends Subject {
           }`,
           StatusCode.error,
           err,
+          ErrorCode.generic,
         );
         throw Error(
           `Error posting new ${objectName} in Planning center to ${
