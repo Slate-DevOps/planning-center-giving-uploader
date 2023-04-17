@@ -89,7 +89,7 @@ export class Donations extends PcoObject {
       relationships: { payment_source: { data: { id: string } } };
     }>(
       "donations",
-      "&where[payment_method]=card&order=-received_at", //TODO: remove hadcoded payment method
+      "&where[payment_method]=card&order=-received_at",
       (data) => {
         return data.relationships.payment_source.data.id === sourceID;
       },

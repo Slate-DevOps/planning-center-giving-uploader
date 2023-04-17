@@ -22,14 +22,15 @@ class ErrorReporter implements Observer {
       case StatusCode.error:
         script = `console.log("error reported: ${message}");`;
         break;
-      case StatusCode.error_donation:
+      case StatusCode.error_duplicate_profile:
+      case StatusCode.error_payment_source:
+        script = `alert("${message}");`;
+        break;
+      case StatusCode.failed_donation:
         script = `console.log("donation failed: ${message}");`;
         break;
-      case StatusCode.success_donation:
+      case StatusCode.successful_donation:
         script = `console.log("donation uploaded: ${message}");`;
-        break;
-      case StatusCode.error_duplicate_profile:
-        script = `alert("${message}");`;
         break;
     }
     if (script) {
@@ -39,14 +40,14 @@ class ErrorReporter implements Observer {
 }
 
 const options = {
-  client_id: Deno.env.get('PCOID'),
-  client_secret: Deno.env.get('PCOS'),
+  client_id: Deno.env.get('PCOID')!,
+  client_secret: Deno.env.get('PCOS')!,
   scopes: 'people+giving', // Scopes limit access for OAuth tokens.
 };
 
 const port = 4444;
-var url = Deno.env.get('URL');
-var redirect_uri;
+let url = Deno.env.get('URL');
+let redirect_uri;
 if (url) {
   redirect_uri = `${url}/auth/complete`;
 } else {
