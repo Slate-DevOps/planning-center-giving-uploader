@@ -146,6 +146,7 @@ router.get('/ws', async ctx => {
     document.getElementById("selected_file_name").innerHTML = data.get("file").name;
   });
   form.addEventListener('submit', async function(e) {
+    document.getElementById("submit").attr("disabled", true);
     e.preventDefault();
     let fileRead = new FileReader();
     const data = new FormData(form);
@@ -214,7 +215,8 @@ function App() {
             <span id="selected_file_name"></span>
         </div>
         <div>
-            <button type="submit" id="submit" class="button">Submit</button>
+            <button type="submit" id="submit" class="button">Upload Donations</button>
+            <span id="upload_status"></span>
         </div>
     </form>
     </div>
