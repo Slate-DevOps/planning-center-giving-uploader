@@ -139,16 +139,18 @@ router.get('/ws', async ctx => {
     const data = JSON.parse(e.data)
     if(data.endpoint === "form"){
       sock.send(JSON.stringify({update: true, value: renderSSR(<App />), script: `
-  console.log("getting form");
   const form = document.getElementById("form");
+  const filePicker = document.getElementById("file");
+  filePicker.addEventListener("change", (event) => {
+    const data = new FormData(form);
+    document.getElementById("selected_file_name").innerHTML = data.get("file");
+  });
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     let fileRead = new FileReader();
     const data = new FormData(form);
+    await fileRead.readAsText(data.get("file"));
     const template = data.get("DATA");
-    const fileName = data.get("file");
-    $("#selected_file_name").innerHTML = fileName;
-    await fileRead.readAsText(fileName);
     fileRead.onloadend = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.result}}))}
     fileRead.onerror = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.error}}))}
   });`}));
