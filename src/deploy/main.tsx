@@ -146,7 +146,7 @@ router.get('/ws', async ctx => {
     document.getElementById("selected_file_name").innerHTML = data.get("file").name;
   });
   form.addEventListener('submit', async function(e) {
-    document.getElementById("submit").attr("disabled", true);
+    $("#submit").attr("disabled", true);
     e.preventDefault();
     let fileRead = new FileReader();
     const data = new FormData(form);
