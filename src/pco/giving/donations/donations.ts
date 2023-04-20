@@ -40,7 +40,7 @@ export class Donations extends PcoObject {
    * @param {number} donation.amount - the amount being donated in cents
    * @param {string} donation.fund - the fund (one of PCO_FUNDS)
    * @param {string} donation.transactionId - the transaction's ID for error purposes
-   * @param {string=} donation.label - the label to be attached to the donation
+   * @param {string} donation.label - the label to be attached to the donation
    *                                   NOTE: must be one of the pre-saved labels
    *
    * @returns {Promise<string>} - uuid of donation created

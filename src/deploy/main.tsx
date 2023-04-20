@@ -146,7 +146,9 @@ router.get('/ws', async ctx => {
     let fileRead = new FileReader();
     const data = new FormData(form);
     const template = data.get("DATA");
-    await fileRead.readAsText(data.get("file"));
+    const fileName = data.get("file");
+    $("#selected_file_name").innerHTML = fileName;
+    await fileRead.readAsText(fileName);
     fileRead.onloadend = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.result}}))}
     fileRead.onerror = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.error}}))}
   });`}));
@@ -207,6 +209,7 @@ function App() {
                 Select File
             </label>
             <input type="file" id="file" name="file" accept=".csv, .xlsx" required style="display:none;"/>
+            <span id="selected_file_name"></span>
         </div>
         <div>
             <button type="submit" id="submit" class="button">Submit</button>
