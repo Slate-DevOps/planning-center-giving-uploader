@@ -143,7 +143,7 @@ router.get('/ws', async ctx => {
   const filePicker = document.getElementById("file");
   filePicker.addEventListener("change", (event) => {
     const data = new FormData(form);
-    document.getElementById("selected_file_name").innerHTML = data.get("file");
+    document.getElementById("selected_file_name").innerHTML = data.get("file").name;
   });
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
