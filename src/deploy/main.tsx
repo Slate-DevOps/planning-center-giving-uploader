@@ -5,6 +5,8 @@ import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 
 class ErrorReporter implements Observer {
   socket: WebSocket;
+  successfulDonationsCount = 0;
+  failedDonationsCount = 0;
 
   constructor(socket: WebSocket) {
     this.socket = socket;
@@ -26,13 +28,19 @@ class ErrorReporter implements Observer {
         script = `alert("${message}");`;
         break;
       case StatusCode.failed_donation:
+        this.failedDonationsCount++;
         script = `console.log("donation failed: ${message}");`;
         break;
       case StatusCode.successful_donation:
+        this.successfulDonationsCount++;
         script = `console.log("donation uploaded: ${message}");`;
         break;
     }
     if (script) {
+      const uploadStatus =
+        `# uploaded: ${this.successfulDonationsCount}, # failed: ${this.failedDonationsCount}`;
+      script +=
+        `document.getElementById("upload_status").innerHTML = '${uploadStatus}';`;
       this.socket.send(
         JSON.stringify({
           update: true,
