@@ -47,7 +47,7 @@ export class Funds extends PcoObject {
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      const validFunds = this.funds.map(elem => elem.name).join();
+      const validFunds = this.funds.map(elem => canonicalize(elem.name)).join();
       this.notify(
         `Unable to find fund '${fund}'. Valid funds: ${validFunds}`,
         StatusCode.error_unknown_fund,
