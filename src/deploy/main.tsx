@@ -11,6 +11,7 @@ class ErrorReporter implements Observer {
   socket: WebSocket;
   successfulDonationsCount = 0;
   failedDonationsCount = 0;
+  alertCount = 0;
 
   constructor(socket: WebSocket) {
     this.socket = socket;
@@ -29,7 +30,13 @@ class ErrorReporter implements Observer {
         break;
       case StatusCode.error_duplicate_profile:
       case StatusCode.error_payment_source:
-        script = `alert("${message}");`;
+        this.alertCount++;
+        if (this.alertCount === 4) {
+          script =
+            `alert("${message}</br>NOTE: No more alerts will be shown if there are still more errors.");`;
+        } else if (this.alertCount <= 3) {
+          script = `alert("${message}")`;
+        }
         break;
       case StatusCode.failed_donation:
         this.failedDonationsCount++;
@@ -43,8 +50,9 @@ class ErrorReporter implements Observer {
     if (script) {
       const uploadStatus =
         `# uploaded: ${this.successfulDonationsCount}, # failed: ${this.failedDonationsCount}`;
-      script +=
-        `document.getElementById("upload_status").innerHTML = '${uploadStatus}';`;
+      script =
+        `document.getElementById("upload_status").innerHTML = '${uploadStatus}';` +
+        script;
       this.socket.send(
         JSON.stringify({
           update: true,
