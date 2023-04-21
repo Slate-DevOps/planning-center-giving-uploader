@@ -1,7 +1,7 @@
 import { Donation } from "./donation.ts";
 import { PcoObject } from "../../pcoObject.ts"
 import { PCO } from "../../pco.ts";
-import { Observer } from "../../../importerWatcher.ts";
+import { Observer, StatusCode } from "../../../importerWatcher.ts";
 import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 export enum PCO_TRANSACTION_METHODS {
@@ -40,7 +40,7 @@ export class Donations extends PcoObject {
    * @param {number} donation.amount - the amount being donated in cents
    * @param {string} donation.fund - the fund (one of PCO_FUNDS)
    * @param {string} donation.transactionId - the transaction's ID for error purposes
-   * @param {string=} donation.label - the label to be attached to the donation
+   * @param {string} donation.label - the label to be attached to the donation
    *                                   NOTE: must be one of the pre-saved labels
    *
    * @returns {Promise<string>} - uuid of donation created
@@ -89,7 +89,7 @@ export class Donations extends PcoObject {
       relationships: { payment_source: { data: { id: string } } };
     }>(
       "donations",
-      "&where[payment_method]=card&order=-received_at", //TODO: remove hadcoded payment method
+      "&where[payment_method]=card&order=-received_at",
       (data) => {
         return data.relationships.payment_source.data.id === sourceID;
       },
@@ -105,6 +105,10 @@ export class Donations extends PcoObject {
     if (method in PCO_TRANSACTION_METHODS) {
       return method;
     }
+    this.notify(
+      `invalid method: ${method}`,
+      StatusCode.error,
+    );
     throw Error(`Invalid Method: ${method}`);
   }
 }

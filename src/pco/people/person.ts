@@ -76,7 +76,7 @@ export class Person extends PcoObject {
     }
     if (typeof person.anniversary !== "undefined") {
       payload.data.attributes["anniversary"] = formatDate(
-        <string> person.anniversary,
+        <string>person.anniversary,
       );
     }
 
@@ -229,7 +229,7 @@ export class Person extends PcoObject {
   async getUUIDFromName(fullName: string): Promise<string> {
 
     //search for person
-    let uuids = [];
+    let uuids: string[] = [];
     try {
       uuids = await this.PCO.People.email.searchOnName(fullName);
     } catch (err) {

@@ -1,5 +1,5 @@
 import { PCO } from "../pco.ts";
-import { Observer } from "../../importerWatcher.ts";
+import { Observer, StatusCode } from "../../importerWatcher.ts";
 import { PcoObject } from "../pcoObject.ts"
 /**
  * Class Funds holds tuples of ids and names of funds that have been stored in planning center
@@ -37,17 +37,21 @@ export class Funds extends PcoObject {
    */
   handleFund(fund: string): number {
     // Transform something like 'Tithes & Offerings' to 'tithes-offerings'
-    const canonicalize = function(name: string) {
-      return name.replace(/[^\w\s]|_/g, '') // remove non-alphanumeric characters
-                 .replace(/\s+/g, '-')      // replace consecutive whitespace with a single dash
-                 .toLowerCase()             // convert the resulting string to lowercase
+    const canonicalize = function (name: string) {
+      return name.replace(/[^\w]|_/g, '') // remove non-alphanumeric characters
+        .toLowerCase()                    // convert the resulting string to lowercase
     };
     const fundId = this.funds.find((elem) => canonicalize(fund) === canonicalize(elem.name));
 
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      throw new Error(`Fund with name ${fund} does not exist in ${this.funds.map(elem => elem.name).join()}`);
+      const validFunds = this.funds.map(elem => `'${canonicalize(elem.name)}'`).join(',');
+      this.notify(
+        `Unable to find fund '${canonicalize(fund)}'. Valid funds: ${validFunds}`,
+        StatusCode.error_unknown_fund,
+      );
+      throw new Error(`Fund with name ${fund} does not exist in ${validFunds}`);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { ErrorCode, Observer, StatusCode, Subject } from "../importerWatcher.ts";
+import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 import { axil } from "https://deno.land/x/axil@v0.0.1/axil.ts";
 import { PCO } from "./pco.ts";
@@ -25,8 +25,7 @@ export class PcoObject extends Subject {
         return this.getExact(uriAddOn);
       } else {
         this.notify(
-          `Error getting object from Planning center at address: ${
-            this.fetcher.baseURL + uriAddOn
+          `Error getting object from Planning center at address: ${this.fetcher.baseURL + uriAddOn
           }`,
           StatusCode.error,
           err,
@@ -104,15 +103,13 @@ export class PcoObject extends Subject {
         return this.postNew(payload, objectName, uriAddOn);
       } else {
         this.notify(
-          `Error posting new ${objectName} in Planning center to ${
-            this.fetcher.baseURL + uriAddOn
+          `Error posting new ${objectName} in Planning center to ${this.fetcher.baseURL + uriAddOn
           }`,
           StatusCode.error,
           err,
         );
         throw Error(
-          `Error posting new ${objectName} in Planning center to ${
-            this.fetcher.baseURL + uriAddOn
+          `Error posting new ${objectName} in Planning center to ${this.fetcher.baseURL + uriAddOn
           }`,
         );
       }

@@ -1,5 +1,5 @@
 import { PCO } from "../pco.ts";
-import { Observer } from "../../importerWatcher.ts";
+import { Observer, StatusCode } from "../../importerWatcher.ts";
 import { PcoObject } from "../pcoObject.ts"
 
 /**
@@ -41,6 +41,11 @@ export class Sources extends PcoObject {
     if (sourceId) {
       return parseInt(sourceId.id);
     } else {
+      this.notify(
+        `Payment source with name '${source}' does not exist on Planning Center`,
+        StatusCode.error_unknown_payment_source,
+        null,
+      );
       throw new Error(`Source with name ${source} does not exist`);
     }
   }

@@ -29,9 +29,11 @@ export class Subject {
 
 export enum StatusCode {
   error = 1,
-  error_donation = 2,
-  error_duplicate_profile = 3,
-  success_donation = 100,
+  error_duplicate_profile = 2,
+  error_unknown_payment_source = 3,
+  error_unknown_fund = 4,
+  failed_donation = 5,
+  successful_donation = 6,
 }
 
 /**

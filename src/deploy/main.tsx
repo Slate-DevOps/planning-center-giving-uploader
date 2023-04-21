@@ -1,11 +1,17 @@
-   
-import { h, renderSSR, Component } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
+import {
+  Component,
+  h,
+  renderSSR,
+} from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 
 class ErrorReporter implements Observer {
   socket: WebSocket;
+  successfulDonationsCount = 0;
+  failedDonationsCount = 0;
+  alertCount = 0;
 
   constructor(socket: WebSocket) {
     this.socket = socket;
@@ -22,44 +28,65 @@ class ErrorReporter implements Observer {
       case StatusCode.error:
         script = `console.log("error reported: ${message}");`;
         break;
-      case StatusCode.error_donation:
+      case StatusCode.error_duplicate_profile:
+      case StatusCode.error_unknown_payment_source:
+      case StatusCode.error_unknown_fund:
+        this.alertCount++;
+        if (this.alertCount === 4) {
+          script =
+            `alert("${message}. NOTE: No more alerts will be shown if there are still more errors.");`;
+        } else if (this.alertCount <= 3) {
+          script = `alert("${message}")`;
+        }
+        break;
+      case StatusCode.failed_donation:
+        this.failedDonationsCount++;
         script = `console.log("donation failed: ${message}");`;
         break;
-      case StatusCode.success_donation:
+      case StatusCode.successful_donation:
+        this.successfulDonationsCount++;
         script = `console.log("donation uploaded: ${message}");`;
-        break;
-      case StatusCode.error_duplicate_profile:
-        script = `alert("${message}");`;
         break;
     }
     if (script) {
-      this.socket.send(JSON.stringify({update: true, value: renderSSR(<App />), script: script}));
+      const uploadStatus =
+        `# uploaded: ${this.successfulDonationsCount}, # failed: ${this.failedDonationsCount}`;
+      script =
+        `document.getElementById("upload_status").innerHTML = '${uploadStatus}';` +
+        script;
+      this.socket.send(
+        JSON.stringify({
+          update: true,
+          value: renderSSR(<App />),
+          script: script,
+        }),
+      );
     }
   }
 }
 
 const options = {
-  client_id: Deno.env.get('PCOID'),
-  client_secret: Deno.env.get('PCOS'),
-  scopes: 'people+giving', // Scopes limit access for OAuth tokens.
+  client_id: Deno.env.get("PCOID")!,
+  client_secret: Deno.env.get("PCOS")!,
+  scopes: "people+giving", // Scopes limit access for OAuth tokens.
 };
 
 const port = 4444;
-var url = Deno.env.get('URL');
-var redirect_uri;
+let url = Deno.env.get("URL");
+let redirect_uri;
 if (url) {
   redirect_uri = `${url}/auth/complete`;
 } else {
   url = `http://localhost`;
   redirect_uri = `${url}:${port}/auth/complete`;
 }
-const api_url = 'https://api.planningcenteronline.com/oauth/authorize'
+const api_url = "https://api.planningcenteronline.com/oauth/authorize";
 
 const authUrl = new URL(api_url);
-authUrl.searchParams.append("client_id", options.client_id)
+authUrl.searchParams.append("client_id", options.client_id);
 authUrl.searchParams.append("redirect_uri", redirect_uri);
-authUrl.searchParams.append("response_type", 'code')
-authUrl.searchParams.append("scope", '')
+authUrl.searchParams.append("response_type", "code");
+authUrl.searchParams.append("scope", "");
 
 const router = new Router();
 let code, token, token_res, token_json;
@@ -68,17 +95,16 @@ router.get("/", (ctx) => {
 });
 
 router.get("/auth/complete", async (ctx) => {
-  code = ctx.request.url.search.replace("?code=", '');
+  code = ctx.request.url.search.replace("?code=", "");
   token_res = await getToken(code);
   token_json = await token_res.json();
   token = token_json.access_token;
-  ctx.response.redirect(`${url}/load`)
-})
+  ctx.response.redirect(`${url}/load`);
+});
 
 router.get("/load", async (ctx) => {
-  //Pass a script tag to the browser to setup the websocket
-  ctx.response.body = 
-  `<html>
+  // Pass a script tag to the browser to setup the websocket
+  ctx.response.body = `<html>
     <head>
       <style>
         .button {
@@ -129,46 +155,68 @@ router.get("/load", async (ctx) => {
   </html>`;
 });
 
-router.get('/ws', async ctx => {
-  console.log("web socket time!")
+router.get("/ws", async (ctx) => {
+  console.log("web socket time!");
   const sock = await ctx.upgrade();
-  sock.onopen = () => {
-  };
+  sock.onopen = () => {};
   sock.onmessage = async (e) => {
-    const data = JSON.parse(e.data)
-    if(data.endpoint === "form"){
-      sock.send(JSON.stringify({update: true, value: renderSSR(<App />), script: `
-  console.log("getting form");
+    const data = JSON.parse(e.data);
+    if (data.endpoint === "form") {
+      sock.send(
+        JSON.stringify({
+          update: true,
+          value: renderSSR(<App />),
+          script: `
   const form = document.getElementById("form");
+  const filePicker = document.getElementById("file");
+  filePicker.addEventListener("change", (event) => {
+    const data = new FormData(form);
+    document.getElementById("selected_file_name").innerHTML = data.get("file").name;
+  });
   form.addEventListener('submit', async function(e) {
+    document.getElementById("submit").disabled = true;
+    document.getElementById("upload_status").innerHTML = "Processing...";
     e.preventDefault();
     let fileRead = new FileReader();
     const data = new FormData(form);
-    const template = data.get("DATA");
     await fileRead.readAsText(data.get("file"));
+    const template = data.get("DATA");
     fileRead.onloadend = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.result}}))}
     fileRead.onerror = () => {ws.send(JSON.stringify({endpoint: "submit", value: {template, file: fileRead.error}}))}
-  });`}));
+  });`,
+        }),
+      );
     }
-    if(data.endpoint === "submit"){
+    if (data.endpoint === "submit") {
       const importer = new Importer([new ErrorReporter(sock)], token);
-      if(data.value.template === "T2T"){
+      if (data.value.template === "T2T") {
         try {
-          await importer.parseDataAndPost({data: data.value.file, batch: `[imported] T2T imported on ${new Date().toDateString()}`, source: `TextToTithe`, method: `card`});
+          await importer.parseDataAndPost({
+            data: data.value.file,
+            batch: `[imported] T2T imported on ${new Date().toDateString()}`,
+            source: `TextToTithe`,
+            method: `card`,
+          });
         } catch (err) {
           console.error(`Error loading TextToTithe data from file: ${err}`);
         }
       }
-      if(data.value.template === "UNI"){
+      if (data.value.template === "UNI") {
         try {
-          await importer.parseDataAndPost({data: data.value.file});
+          await importer.parseDataAndPost({ data: data.value.file });
         } catch (err) {
           console.error(`Error loading Universal data from file: ${err}`);
         }
       }
-      if(data.value.template === "PP"){
+      if (data.value.template === "PP") {
         try {
-          await importer.parseDataAndPost({data: data.value.file, batch: `[imported] PayPal imported on ${new Date().toDateString()}`, source: `Paypal`, method: `card`, fund: `general`});
+          await importer.parseDataAndPost({
+            data: data.value.file,
+            batch: `[imported] PayPal imported on ${new Date().toDateString()}`,
+            source: `Paypal`,
+            method: `card`,
+            fund: `general`,
+          });
         } catch (err) {
           console.error(`Error loading PayPal data from file: ${err}`);
         }
@@ -177,41 +225,60 @@ router.get('/ws', async ctx => {
   };
   sock.onclose = () => console.log("WebSocket has been closed.");
   sock.onerror = (e) => console.error("WebSocket error:", e);
-})
+});
 
 function App() {
   return (
     <div class="body">
-    <div class="box">
-    <h1>PCO Giving Importer</h1>
-    <form id="form" name="form" onsubmit="(e) => {e.preventDefault()}" enctype="multipart/form-data">
-        <div>
+      <div class="box">
+        <h1>PCO Giving Importer</h1>
+        <form
+          id="form"
+          name="form"
+          onsubmit="(e) => {e.preventDefault()}"
+          enctype="multipart/form-data"
+        >
+          <div>
             <h2>
-                Template Type:
+              Template Type:
             </h2>
             <div style="justify-content:left;">
-                <input type="radio" id="PP" name="DATA" value="PP" />
-                <label for="PP">PayPal</label><br />
-                <input type="radio" id="T2T" name="DATA" value="T2T" />
-                <label for="T2T">Text 2 tithe</label><br />
-                <input type="radio" id="UNI" name="DATA" value="UNI" />
-                <label for="UNI">Universal</label><br />
+              <input type="radio" id="PP" name="DATA" value="PP" />
+              <label for="PP">PayPal</label>
+              <br />
+              <input type="radio" id="T2T" name="DATA" value="T2T" />
+              <label for="T2T">Text 2 tithe</label>
+              <br />
+              <input type="radio" id="UNI" name="DATA" value="UNI" />
+              <label for="UNI">Universal</label>
+              <br />
             </div>
-        </div>
-        <div>
+          </div>
+          <div>
             <h2>
-                File:
+              File:
             </h2>
             <label for="file" class="button">
-                Select File
+              Select File
             </label>
-            <input type="file" id="file" name="file" accept=".csv, .xlsx" required style="display:none;"/>
-        </div>
-        <div>
-            <button type="submit" id="submit" class="button">Submit</button>
-        </div>
-    </form>
-    </div>
+            <input
+              type="file"
+              id="file"
+              name="file"
+              accept=".csv, .xlsx"
+              required
+              style="display:none;"
+            />
+            <span id="selected_file_name"></span>
+          </div>
+          <div>
+            <button type="submit" id="submit" class="button">
+              Upload Donations
+            </button>
+            <span id="upload_status"></span>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -239,7 +306,7 @@ async function getToken(code: string): Promise<Response> {
     headers: {
       Accept: "application/json",
       "Accept-Language": "en_US",
-      "content-type": "application/x-www-form-urlencoded"
+      "content-type": "application/x-www-form-urlencoded",
     },
   });
 }

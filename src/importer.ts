@@ -9,7 +9,7 @@ import { validateProperty } from "https://deno.land/x/typescript_utils@v0.0.1/ut
 /**
  * Importer class provides a way to import some csv files containing donation info into PCO or pull new donations from PayPal.
  */
-export class Importer extends Subject{
+export class Importer extends Subject {
   IsSetup: boolean;
   token: string;
   PCO: PCO;
@@ -22,7 +22,7 @@ export class Importer extends Subject{
   constructor(observers: Observer[], token?: string) {
     super(observers);
     this.IsSetup = false;
-    this.token = token? token : '';
+    this.token = token ? token : '';
     this.PCO = new PCO(observers, token);
   }
 
@@ -77,7 +77,7 @@ export class Importer extends Subject{
       } catch (err) {
         this.notify(
           "error encountered during donation creation",
-          StatusCode.error_donation,
+          StatusCode.failed_donation,
           err,
         );
         continue;
@@ -88,14 +88,15 @@ export class Importer extends Subject{
       } catch (err) {
         this.notify(
           "error encountered during donation upload",
-          StatusCode.error_donation,
+          StatusCode.failed_donation,
           err,
         );
+        continue;
       }
 
       this.notify(
         "successfully uploaded donation",
-        StatusCode.success_donation,
+        StatusCode.successful_donation,
       );
     }
   }
@@ -136,7 +137,7 @@ export class Importer extends Subject{
       this.notify("Row missing full name", StatusCode.error);
       throw Error("Row missing full name");
     }
-    
+
     try {
       uuid = await this.PCO.People.person.getUUID(fullName, email);
     } catch (err) {
