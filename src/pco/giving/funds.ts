@@ -47,11 +47,12 @@ export class Funds extends PcoObject {
     if (fundId) {
       return parseInt(fundId.id);
     } else {
+      const validFunds = this.funds.map(elem => elem.name).join();
       this.notify(
-        `invalid fund: ${fund}`,
-        StatusCode.error,
+        `Unable to find fund '${fund}'. Valid funds: ${validFunds}`,
+        StatusCode.error_unknown_fund,
       );
-      throw new Error(`Fund with name ${fund} does not exist in ${this.funds.map(elem => elem.name).join()}`);
+      throw new Error(`Fund with name ${fund} does not exist in ${validFunds}`);
     }
   }
 }

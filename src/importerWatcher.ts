@@ -30,9 +30,10 @@ export class Subject {
 export enum StatusCode {
   error = 1,
   error_duplicate_profile = 2,
-  error_payment_source = 3,
-  failed_donation = 4,
-  successful_donation = 5,
+  error_unknown_payment_source = 3,
+  error_unknown_fund = 4,
+  failed_donation = 5,
+  successful_donation = 6,
 }
 
 /**

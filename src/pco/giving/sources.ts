@@ -43,7 +43,7 @@ export class Sources extends PcoObject {
     } else {
       this.notify(
         `Payment source with name '${source}' does not exist on Planning Center`,
-        StatusCode.error_payment_source,
+        StatusCode.error_unknown_payment_source,
         null,
       );
       throw new Error(`Source with name ${source} does not exist`);
