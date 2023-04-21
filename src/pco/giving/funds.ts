@@ -38,16 +38,15 @@ export class Funds extends PcoObject {
   handleFund(fund: string): number {
     // Transform something like 'Tithes & Offerings' to 'tithes-offerings'
     const canonicalize = function (name: string) {
-      return name.replace(/[^\w\s]|_/g, '') // remove non-alphanumeric characters
-        .replace(/\s+/g, '-')      // replace consecutive whitespace with a single dash
-        .toLowerCase()             // convert the resulting string to lowercase
+      return name.replace(/[^\w]|_/g, '') // remove non-alphanumeric characters
+        .toLowerCase()                    // convert the resulting string to lowercase
     };
     const fundId = this.funds.find((elem) => canonicalize(fund) === canonicalize(elem.name));
 
     if (fundId) {
       return parseInt(fundId.id);
     } else {
-      const validFunds = this.funds.map(elem => canonicalize(elem.name)).join();
+      const validFunds = this.funds.map(elem => `'${canonicalize(elem.name)}'`).join(',');
       this.notify(
         `Unable to find fund '${canonicalize(fund)}'. Valid funds: ${validFunds}`,
         StatusCode.error_unknown_fund,
