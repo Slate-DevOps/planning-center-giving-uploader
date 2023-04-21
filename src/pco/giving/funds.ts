@@ -49,7 +49,7 @@ export class Funds extends PcoObject {
     } else {
       const validFunds = this.funds.map(elem => canonicalize(elem.name)).join();
       this.notify(
-        `Unable to find fund '${fund}'. Valid funds: ${validFunds}`,
+        `Unable to find fund '${canonicalize(fund)}'. Valid funds: ${validFunds}`,
         StatusCode.error_unknown_fund,
       );
       throw new Error(`Fund with name ${fund} does not exist in ${validFunds}`);
