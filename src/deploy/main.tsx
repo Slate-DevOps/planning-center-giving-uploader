@@ -1,4 +1,8 @@
-import { renderSSR } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
+import {
+  Component,
+  h,
+  renderSSR,
+} from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
