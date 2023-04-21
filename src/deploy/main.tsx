@@ -33,7 +33,7 @@ class ErrorReporter implements Observer {
         this.alertCount++;
         if (this.alertCount === 4) {
           script =
-            `alert("${message}\n\nNOTE: No more alerts will be shown if there are still more errors.");`;
+            `alert("${message}. NOTE: No more alerts will be shown if there are still more errors.");`;
         } else if (this.alertCount <= 3) {
           script = `alert("${message}")`;
         }
