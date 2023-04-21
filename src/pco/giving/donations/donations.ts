@@ -1,7 +1,7 @@
 import { Donation } from "./donation.ts";
 import { PcoObject } from "../../pcoObject.ts"
 import { PCO } from "../../pco.ts";
-import { Observer } from "../../../importerWatcher.ts";
+import { Observer, StatusCode } from "../../../importerWatcher.ts";
 import { validateObject } from "https://deno.land/x/typescript_utils@v0.0.1/utils.ts";
 
 export enum PCO_TRANSACTION_METHODS {
@@ -105,6 +105,10 @@ export class Donations extends PcoObject {
     if (method in PCO_TRANSACTION_METHODS) {
       return method;
     }
+    this.notify(
+      `invalid method: ${method}`,
+      StatusCode.error,
+    );
     throw Error(`Invalid Method: ${method}`);
   }
 }
