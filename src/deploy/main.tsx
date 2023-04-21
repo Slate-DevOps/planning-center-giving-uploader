@@ -174,6 +174,7 @@ router.get("/ws", async (ctx) => {
   });
   form.addEventListener('submit', async function(e) {
     document.getElementById("submit").disabled = true;
+    document.getElementById("upload_status").innerHTML = "Processing...";
     e.preventDefault();
     let fileRead = new FileReader();
     const data = new FormData(form);
