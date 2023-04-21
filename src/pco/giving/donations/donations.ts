@@ -48,10 +48,6 @@ export class Donations extends PcoObject {
   async postDonation(donation: Donation): Promise<string | undefined> {
     const batchId = await this.PCO.Giving.batches.handleBatch(donation.batch);
 
-    this.notify(
-      `info: ${donation.date}`,
-      StatusCode.error,
-    );
     const payload = {
       data: {
         type: "Donation",
