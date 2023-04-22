@@ -171,6 +171,7 @@ export class Importer extends Subject {
     } else {
       date = new Date(dateVal);
     }
+    date.setDate(date.getDate() + 1); // Fix off by one error (presumably due to some timezone nonsense)
     return new Donation(
       uuid,
       date.toISOString(),
