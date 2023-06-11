@@ -34,6 +34,7 @@ export enum StatusCode {
   error_unknown_fund = 4,
   failed_donation = 5,
   successful_donation = 6,
+  error_unauthorized = 7,
 }
 
 /**

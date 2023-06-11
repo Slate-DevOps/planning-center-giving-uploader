@@ -47,6 +47,8 @@ class ErrorReporter implements Observer {
         this.successfulDonationsCount++;
         script = `console.log("donation uploaded: ${message}");`;
         break;
+      case StatusCode.error_unauthorized:
+        script = `alert("${message}");`;
     }
     if (script) {
       const uploadStatus =
