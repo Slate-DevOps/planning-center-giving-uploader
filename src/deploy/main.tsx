@@ -31,6 +31,7 @@ class ErrorReporter implements Observer {
       case StatusCode.error_duplicate_profile:
       case StatusCode.error_unknown_payment_source:
       case StatusCode.error_unknown_fund:
+      case StatusCode.error_unauthorized:
         this.alertCount++;
         if (this.alertCount === 4) {
           script =
@@ -47,8 +48,6 @@ class ErrorReporter implements Observer {
         this.successfulDonationsCount++;
         script = `console.log("donation uploaded: ${message}");`;
         break;
-      case StatusCode.error_unauthorized:
-        script = `alert("${message}");`;
     }
     if (script) {
       const uploadStatus =
