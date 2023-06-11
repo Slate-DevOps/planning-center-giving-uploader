@@ -25,7 +25,7 @@ export class PcoObject extends Subject {
         return this.getExact(uriAddOn);
       } else {
         this.notify(
-          `Error getting object from Planning center at address ${this.fetcher.baseURL + uriAddOn} with error ${err}`,
+          `Error getting object from Planning center at address ${this.fetcher.baseURL + uriAddOn} with error ${JSON.stringify(err)}`,
           StatusCode.error,
           err,
         );
