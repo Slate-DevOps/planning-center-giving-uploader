@@ -13,20 +13,26 @@ export class PcoObject extends Subject {
     const Authorization = token ? `Bearer ${token}` : "Basic " +
       btoa(`${Deno.env.get("PCOID")}:${Deno.env.get("PCOS")}`);
     this.fetcher = new axil(baseURL, new Headers({ Authorization }));
-    this.PCO = PCO
+    this.PCO = PCO;
   }
 
   async getExact(uriAddOn: string): Promise<Response | undefined> {
     try {
       return await this.fetcher.get(uriAddOn);
     } catch (err) {
-      if (err && (err as Response).status.toString() === "429") {
+      const errorCode = (err as Response).status.toString();
+      if (err && errorCode === "429") {
         await new Promise((r) => setTimeout(r, 20000));
         return this.getExact(uriAddOn);
+      } else if (err && errorCode === "401") {
+        this.notify(
+          `Unable to log into Planning Center.`,
+          StatusCode.error_unauthorized,
+          err,
+        );
       } else {
         this.notify(
-          `Error getting object from Planning center at address: ${this.fetcher.baseURL + uriAddOn
-          }`,
+          `Error getting object from Planning center at address ${this.fetcher.baseURL + uriAddOn} with error code ${(err as Response).status.toString()}`,
           StatusCode.error,
           err,
         );
