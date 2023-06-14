@@ -26,7 +26,7 @@ export class PcoObject extends Subject {
         return this.getExact(uriAddOn);
       } else if (err && errorCode === "401") {
         this.notify(
-          `Unable to log into Planning Center.`,
+          `Unable to log into Planning Center. Error: ${JSON.stringify(err as Response)}`,
           StatusCode.error_unauthorized,
           err,
         );
