@@ -67,9 +67,9 @@ class ErrorReporter implements Observer {
 }
 
 const options = {
-  client_id: Deno.env.get("PCOID")!,
-  client_secret: Deno.env.get("PCOS")!,
-  scopes: "people+giving", // Scopes limit access for OAuth tokens.
+  google_client_id: Deno.env.get("GOOGLE_CLIENT_ID")!,
+  google_client_secret: Deno.env.get("GOOGLE_CLIENT_SECRET")!,
+  // planning_center_personal_access_token: Deno.env.get("PLANNING_CENTER_PERSONAL_ACCESS_TOKEN")!
 };
 
 const port = 4444;
@@ -81,10 +81,10 @@ if (url) {
   url = `http://localhost`;
   redirect_uri = `${url}:${port}/auth/complete`;
 }
-const api_url = "https://api.planningcenteronline.com/oauth/authorize";
+const api_url = "https://accounts.google.com/o/oauth2/v2/auth";
 
 const authUrl = new URL(api_url);
-authUrl.searchParams.append("client_id", options.client_id);
+authUrl.searchParams.append("client_id", options.google_client_id);
 authUrl.searchParams.append("redirect_uri", redirect_uri);
 authUrl.searchParams.append("response_type", "code");
 authUrl.searchParams.append("scope", "");
@@ -92,7 +92,7 @@ authUrl.searchParams.append("scope", "");
 const router = new Router();
 let code, token, token_res, token_json;
 router.get("/", (ctx) => {
-  ctx.response.redirect(authUrl + options.scopes);
+  ctx.response.redirect(authUrl);
 });
 
 router.get("/auth/complete", async (ctx) => {
@@ -100,7 +100,12 @@ router.get("/auth/complete", async (ctx) => {
   token_res = await getToken(code);
   token_json = await token_res.json();
   token = token_json.access_token;
-  ctx.response.redirect(`${url}/load`);
+
+  const emailResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${token}`);
+  const { email } = await emailResponse.json();
+  if (email) {
+    ctx.response.redirect(`${url}/load`);
+  }
 });
 
 router.get("/load", async (ctx) => {
@@ -228,33 +233,7 @@ router.get("/ws", async (ctx) => {
   sock.onerror = (e) => console.error("WebSocket error:", e);
 });
 
-function LoginForm() {
-
-  function handleSubmit(e) {
-    console.log(e);
-    // if (password === 'testing123') {
-      localStorage.setItem('token', "value");
-    // }
-  }
-
-  return (
-    <div class="body">
-      <form onSubmit={handleSubmit}>
-        <input value={email} />
-        <input value={password} />
-        <button type="submit">Login</button>
-      </form>
-    </div>
-  );
-}
-
 function App() {
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    return <LoginForm />
-  }
-
   return (
     <div class="body">
       <div class="box">
@@ -321,12 +300,12 @@ app.addEventListener(
 await app.listen({ port });
 
 async function getToken(code: string): Promise<Response> {
-  const url_auth = new URL("https://api.planningcenteronline.com/oauth/token");
+  const url_auth = new URL("https://oauth2.googleapis.com/token");
   url_auth.searchParams.append("grant_type", "authorization_code");
   url_auth.searchParams.append("type", "web_server");
-  url_auth.searchParams.append("client_id", options.client_id);
+  url_auth.searchParams.append("client_id", options.google_client_id);
   url_auth.searchParams.append("redirect_uri", `${url}/auth/complete`);
-  url_auth.searchParams.append("client_secret", options.client_secret);
+  url_auth.searchParams.append("client_secret", options.google_client_secret);
   url_auth.searchParams.append("code", code);
   return await fetch(url_auth, {
     method: "post",
