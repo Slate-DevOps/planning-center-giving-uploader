@@ -6,7 +6,6 @@ import {
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
-import React, { useState } from 'react';
 
 class ErrorReporter implements Observer {
   socket: WebSocket;
@@ -239,11 +238,13 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input value={email}} />
-      <input value={password}} />
-      <button type="submit">Login</button>
-    </form>
+    <div class="body">
+      <form onSubmit={handleSubmit}>
+        <input value={email} />
+        <input value={password} />
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 }
 
