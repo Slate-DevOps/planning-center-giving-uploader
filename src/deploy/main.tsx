@@ -230,19 +230,18 @@ router.get("/ws", async (ctx) => {
 });
 
 function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
   function handleSubmit(e) {
-    if (password === 'testing123') {
+    console.log(e);
+    // if (password === 'testing123') {
       localStorage.setItem('token', "value");
-    }
+    // }
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <input value={email} onChange={e => setEmail(e.target.value)} />
-      <input value={password} onChange={e => setPassword(e.target.value)} />
+      <input value={email}} />
+      <input value={password}} />
       <button type="submit">Login</button>
     </form>
   );
