@@ -6,6 +6,7 @@ import {
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
+import React, { useState } from 'react';
 
 class ErrorReporter implements Observer {
   socket: WebSocket;
@@ -228,7 +229,32 @@ router.get("/ws", async (ctx) => {
   sock.onerror = (e) => console.error("WebSocket error:", e);
 });
 
+function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleSubmit(e) {
+    if (password === 'testing123') {
+      localStorage.setItem('token', "value");
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={email} onChange={e => setEmail(e.target.value)} />
+      <input value={password} onChange={e => setPassword(e.target.value)} />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
 function App() {
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <LoginForm />
+  }
+
   return (
     <div class="body">
       <div class="box">
