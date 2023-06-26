@@ -69,8 +69,6 @@ class ErrorReporter implements Observer {
 const options = {
   google_client_id: Deno.env.get("GOOGLE_CLIENT_ID")!,
   google_client_secret: Deno.env.get("GOOGLE_CLIENT_SECRET")!,
-  planning_center_personal_id: Deno.env.get("PLANNING_CENTER_PERSONAL_ID")!,
-  planning_center_personal_secret: Deno.env.get("PLANNING_CENTER_PERSONAL_SECRET")!
 };
 
 const port = 4444;
