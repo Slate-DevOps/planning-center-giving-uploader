@@ -96,20 +96,20 @@ router.get("/", (ctx) => {
 
 router.get("/auth/complete", async (ctx) => {
   code = ctx.request.url.search.replace("?code=", "");
-  console.log(code);
+  console.log("CODE: " + code);
   token_res = await getToken(code);
   token_json = await token_res.json();
-  console.log(token_json);
+  console.log("JSON: " + token_json);
   token = token_json.access_token;
   ctx.response.redirect(`${url}/load`);
 });
 
 router.get("/load", (ctx) => {
   // This forces the user to prove they can login to a Google domain associated with the church before being able to upload donations
-  console.log(token);
-  if (!token) {
-    ctx.response.redirect(authUrl);
-  }
+  // console.log(token);
+  // if (!token) {
+  //   ctx.response.redirect(authUrl);
+  // }
   // Pass a script tag to the browser to setup the websocket
   ctx.response.body = `<html>
     <head>
