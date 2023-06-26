@@ -111,6 +111,10 @@ router.get("/auth/complete", async (ctx) => {
 });
 
 router.get("/load", async (ctx) => {
+  console.log(token);
+  if (!(await token)) {
+    ctx.response.redirect(authUrl);
+  }
   // Pass a script tag to the browser to setup the websocket
   ctx.response.body = `<html>
     <head>
