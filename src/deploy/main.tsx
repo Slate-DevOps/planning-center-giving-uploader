@@ -97,7 +97,7 @@ router.get("/auth/complete", async (ctx) => {
   console.log("CODE: " + code);
   token_res = await getToken(code);
   token_json = await token_res.json();
-  console.log("JSON: " + token_json);
+  console.log("JSON: " + JSON.stringify(token_json));
   token = token_json.access_token;
   ctx.response.redirect(`${url}/load`);
 });
