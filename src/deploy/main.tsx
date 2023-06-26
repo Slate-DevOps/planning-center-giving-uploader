@@ -93,7 +93,7 @@ router.get("/", (ctx) => {
 });
 
 router.get("/auth/complete", async (ctx) => {
-  code = ctx.request.url.search.replace("?code=", "");
+  code = decodeURIComponent(ctx.request.url.search.replace("?code=", ""));
   console.log("CODE: " + code);
   token_res = await getToken(code);
   token_json = await token_res.json();
