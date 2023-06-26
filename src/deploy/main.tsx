@@ -104,8 +104,10 @@ router.get("/load", (ctx) => {
   // This forces the user to prove they can login to a Google domain associated with the church before being able to upload donations
   console.log("TOKEN: ", token);
   if (!token) {
+    console.log("REDIRECTING TO AUTH");
     ctx.response.redirect(authUrl);
   }
+  console.log("NOT REDIRECTING");
   // Pass a script tag to the browser to setup the websocket
   ctx.response.body = `<html>
     <head>
