@@ -102,6 +102,7 @@ router.get("/auth/complete", async (ctx) => {
 
 router.get("/load", (ctx) => {
   // This forces the user to prove they can login to a Google domain associated with the church before being able to upload donations
+  console.log("TOKEN: ", token);
   if (!token) {
     ctx.response.redirect(authUrl);
   }
