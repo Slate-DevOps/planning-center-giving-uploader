@@ -3,8 +3,7 @@ import {
   h,
   renderSSR,
 } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
-import { Application, Router, Context } from 'https://deno.land/x/oak/mod.ts';
-import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 
@@ -111,7 +110,7 @@ router.get("/auth/complete", async (ctx) => {
 });
 
 router.get("/load", async (ctx) => {
-  console.log(token);
+  // This forces the user to prove they can login to a Google domain associated with the church before being able to upload donations
   if (!(await token)) {
     ctx.response.redirect(authUrl);
   }
@@ -200,7 +199,7 @@ router.get("/ws", async (ctx) => {
       );
     }
     if (data.endpoint === "submit") {
-      const importer = new Importer([new ErrorReporter(sock)], token);
+      const importer = new Importer([new ErrorReporter(sock)]);
       if (data.value.template === "T2T") {
         try {
           await importer.parseDataAndPost({
@@ -299,20 +298,6 @@ const app = new Application();
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-
-app.use(Session.initMiddleware());
-app.use(async (ctx: Context, next) => {
-  console.log(ctx.request.url.pathname);
-  if (ctx.request.url.pathname === '/load') {
-    const session = await ctx.state.session as Session;
-    if (!session || !session.get('user')) {
-      // User is not authenticated, redirect to the OAuth login page
-      return ctx.response.redirect('/auth');
-    }
-  }
-  await next();
-});
-
 app.addEventListener(
   "listen",
   (e) => console.log(`Listening on ${url}:${port}`),
@@ -323,8 +308,8 @@ async function getToken(code: string): Promise<Response> {
   const url_auth = new URL("https://oauth2.googleapis.com/token");
   url_auth.searchParams.append("grant_type", "authorization_code");
   url_auth.searchParams.append("type", "web_server");
-  url_auth.searchParams.append("client_id", options.google_client_id);
   url_auth.searchParams.append("redirect_uri", `${url}/auth/complete`);
+  url_auth.searchParams.append("client_id", options.google_client_id);
   url_auth.searchParams.append("client_secret", options.google_client_secret);
   url_auth.searchParams.append("code", code);
   return await fetch(url_auth, {

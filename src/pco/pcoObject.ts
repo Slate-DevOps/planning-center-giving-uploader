@@ -11,7 +11,7 @@ export class PcoObject extends Subject {
     super(observers);
     const baseURL = `https://api.planningcenteronline.com/${axiosURL}`;
     const Authorization = token ? `Bearer ${token}` : "Basic " +
-      btoa(`${Deno.env.get("PCOID")}:${Deno.env.get("PCOS")}`);
+      btoa(`${Deno.env.get("PLANNING_CENTER_PERSONAL_ID")}:${Deno.env.get("PLANNING_CENTER_PERSONAL_SECRET")}`);
     this.fetcher = new axil(baseURL, new Headers({ Authorization }));
     this.PCO = PCO;
   }
