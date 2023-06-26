@@ -1,7 +1,4 @@
-import {
-  assertEquals,
-  assertThrows,
-} from "https://deno.land/std@0.107.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.107.0/testing/asserts.ts";
 import { assertRejects } from "https://deno.land/std@0.111.0/testing/asserts.ts";
 import { Stub, stub } from "https://deno.land/x/mock@0.10.1/stub.ts";
 import { Batches } from "./batches.ts";

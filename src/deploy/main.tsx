@@ -3,7 +3,8 @@ import {
   h,
   renderSSR,
 } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { Application, Router, Context } from 'https://deno.land/x/oak/mod.ts';
+import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 import { Importer } from "../importer.ts";
 import { Observer, StatusCode, Subject } from "../importerWatcher.ts";
 
@@ -69,7 +70,8 @@ class ErrorReporter implements Observer {
 const options = {
   google_client_id: Deno.env.get("GOOGLE_CLIENT_ID")!,
   google_client_secret: Deno.env.get("GOOGLE_CLIENT_SECRET")!,
-  // planning_center_personal_access_token: Deno.env.get("PLANNING_CENTER_PERSONAL_ACCESS_TOKEN")!
+  planning_center_personal_id: Deno.env.get("PLANNING_CENTER_PERSONAL_ID")!,
+  planning_center_personal_secret: Deno.env.get("PLANNING_CENTER_PERSONAL_SECRET")!
 };
 
 const port = 4444;
@@ -292,6 +294,19 @@ function App() {
 const app = new Application();
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+
+app.use(Session.initMiddleware());
+app.use(async (ctx: Context, next) => {
+  if (ctx.request.url.pathname === '/load') {
+    const session = await ctx.state.session as Session;
+    if (!session || !session.get('user')) {
+      // User is not authenticated, redirect to the OAuth login page
+      return ctx.response.redirect('/auth');
+    }
+  }
+  await next();
+});
 
 app.addEventListener(
   "listen",
