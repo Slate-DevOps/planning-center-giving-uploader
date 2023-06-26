@@ -298,6 +298,7 @@ app.use(router.allowedMethods());
 
 app.use(Session.initMiddleware());
 app.use(async (ctx: Context, next) => {
+  console.log(ctx.request.url.pathname);
   if (ctx.request.url.pathname === '/load') {
     const session = await ctx.state.session as Session;
     if (!session || !session.get('user')) {
