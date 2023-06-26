@@ -87,7 +87,7 @@ const authUrl = new URL(api_url);
 authUrl.searchParams.append("client_id", options.google_client_id);
 authUrl.searchParams.append("redirect_uri", redirect_uri);
 authUrl.searchParams.append("response_type", "code");
-authUrl.searchParams.append("scope", "");
+authUrl.searchParams.append("scope", "https://www.googleapis.com/auth/userinfo.email");
 
 const router = new Router();
 let code, token, token_res, token_json;
