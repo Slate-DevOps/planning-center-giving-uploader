@@ -101,12 +101,7 @@ router.get("/auth/complete", async (ctx) => {
   token_res = await getToken(code);
   token_json = await token_res.json();
   token = token_json.access_token;
-
-  const emailResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${token}`);
-  const { email } = await emailResponse.json();
-  if (email) {
-    ctx.response.redirect(`${url}/load`);
-  }
+  ctx.response.redirect(`${url}/load`);
 });
 
 router.get("/load", async (ctx) => {
