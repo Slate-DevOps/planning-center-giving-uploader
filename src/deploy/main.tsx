@@ -101,6 +101,7 @@ router.get("/auth/complete", async (ctx) => {
   token_res = await getToken(code);
   token_json = await token_res.json();
   token = token_json.access_token;
+  console.log(token);
   ctx.response.redirect(`${url}/load`);
 });
 
