@@ -303,8 +303,8 @@ async function getToken(code: string): Promise<Response> {
   const url_auth = new URL("https://oauth2.googleapis.com/token");
   url_auth.searchParams.append("grant_type", "authorization_code");
   url_auth.searchParams.append("type", "web_server");
-  url_auth.searchParams.append("redirect_uri", `${url}/auth/complete`);
   url_auth.searchParams.append("client_id", options.google_client_id);
+  url_auth.searchParams.append("redirect_uri", `${url}/auth/complete`);
   url_auth.searchParams.append("client_secret", options.google_client_secret);
   url_auth.searchParams.append("code", code);
   return await fetch(url_auth, {
