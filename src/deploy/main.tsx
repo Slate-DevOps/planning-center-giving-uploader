@@ -82,9 +82,7 @@ if (url) {
   url = `http://localhost`;
   redirect_uri = `${url}:${port}/auth/complete`;
 }
-const api_url = "https://accounts.google.com/o/oauth2/v2/auth";
-
-const authUrl = new URL(api_url);
+const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
 authUrl.searchParams.append("client_id", options.google_client_id);
 authUrl.searchParams.append("redirect_uri", redirect_uri);
 authUrl.searchParams.append("response_type", "code");
@@ -101,13 +99,13 @@ router.get("/auth/complete", async (ctx) => {
   token_res = await getToken(code);
   token_json = await token_res.json();
   token = token_json.access_token;
-  console.log(token);
   ctx.response.redirect(`${url}/load`);
 });
 
-router.get("/load", async (ctx) => {
+router.get("/load", (ctx) => {
   // This forces the user to prove they can login to a Google domain associated with the church before being able to upload donations
-  if (!(await token)) {
+  console.log(token);
+  if (!token) {
     ctx.response.redirect(authUrl);
   }
   // Pass a script tag to the browser to setup the websocket
